@@ -80,4 +80,27 @@ contract QuickSortTest is Test {
     assertEq(data[3], 567);
     assertEq(data[4], 1456);
   }
+
+  function testSortWithDuplicates() public {
+    uint[] memory data = new uint[](4);
+    data[0] = 243;
+    data[1] = 243;
+    data[2] = 1;
+    data[3] = 243;
+
+    uint[] memory sortedIndices;
+    (data, sortedIndices) = tester.sort(data);
+
+    // confirm indices - duplicates will not be stable
+    assertEq(sortedIndices[0], 2);
+    assertEq(sortedIndices[1], 3);
+    assertEq(sortedIndices[2], 0);
+    assertEq(sortedIndices[3], 1);
+
+    // confirm data
+    assertEq(data[0], 1);
+    assertEq(data[1], 243);
+    assertEq(data[2], 243);
+    assertEq(data[3], 243);
+  }
 }
