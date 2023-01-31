@@ -2,12 +2,12 @@
 pragma solidity ^0.8.13;
 
 /**
- * @title OrderedMemoryArray
+ * @title QuickSort
  * @author Lyra
- * @notice util functions for in-memory ordered array operations
+ * @notice using quick-sort to sort memory arrays.
  */
 
-library OrderedMemoryArray {
+library QuickSort {
 
   /**
    * @dev Sort both array and return sorted array of indexes
@@ -15,9 +15,9 @@ library OrderedMemoryArray {
    * @param data array of values to sort
    * @return sortedIndices array of sorted indices
    */
-  function quickSortIndices(uint[] memory data) public view returns (uint[] memory sortedIndices) {
+  function sort(uint[] memory data) public view returns (uint[] memory sortedIndices) {
     sortedIndices = initIndices(data.length);
-    quickSort(data, sortedIndices, int(0), int(data.length - 1));
+    sort(data, sortedIndices, int(0), int(data.length - 1));
     return sortedIndices;
   }
 
@@ -30,7 +30,7 @@ library OrderedMemoryArray {
    * @param left left bound
    * @param right right bound
    */
-  function quickSort(uint[] memory arr, uint[] memory indices, int left, int right) public view {    
+  function sort(uint[] memory arr, uint[] memory indices, int left, int right) public view {    
     int i = left;
     int j = right;
     if(i==j) return;
@@ -46,9 +46,9 @@ library OrderedMemoryArray {
       }
     }
     if (left < j)
-      quickSort(arr, indices, left, j);
+      sort(arr, indices, left, j);
     if (i < right)
-      quickSort(arr, indices, i, right);
+      sort(arr, indices, i, right);
   }
 
   /**
@@ -60,7 +60,7 @@ library OrderedMemoryArray {
   function initIndices(uint length) public pure returns (uint[] memory initialIndices) {
     initialIndices = new uint[](length);
     for (uint i; i < length; i++) {
-      initialIndices[0] = i;
+      initialIndices[i] = i;
     }
   }
 }
