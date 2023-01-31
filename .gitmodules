@@ -1,3 +1,0 @@
-[submodule "lib/foundry"]
-	path = lib/foundry
-	url = https://github.com/foundry-rs/foundry
