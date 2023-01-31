@@ -11,14 +11,16 @@ library QuickSort {
 
   /**
    * @dev Sort both array and return sorted array of indexes
+   *      The data is not sorted in-memory due to recursion - a new array is returned.
    *      E.g. [100, 10, 500] -> sorted indices: [1, 0, 2]
    * @param data array of values to sort
+   * @return sortedData new array with sorted data
    * @return sortedIndices array of sorted indices
    */
-  function sort(uint[] memory data) public view returns (uint[] memory sortedIndices) {
+  function sort(uint[] memory data) public view returns (uint[] memory sortedData, uint[] memory sortedIndices) {
     sortedIndices = initIndices(data.length);
     sort(data, sortedIndices, int(0), int(data.length - 1));
-    return sortedIndices;
+    return (data, sortedIndices);
   }
 
 

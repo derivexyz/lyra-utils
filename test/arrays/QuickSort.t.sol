@@ -12,7 +12,7 @@ contract QuickSortTester {
   function sort(uint[] memory data)
     external
     view
-    returns (uint[] memory sortedIndices)
+    returns (uint[] memory sortedData, uint[] memory sortedIndices)
   {
     return QuickSort.sort(data);
   }
@@ -35,12 +35,49 @@ contract QuickSortTest is Test {
     data[4] = 7;
     data[5] = 1;
 
-    uint[] memory sortedIndices = tester.sort(data);
+    uint[] memory sortedIndices;
+    (data, sortedIndices) = tester.sort(data);
+
+    // confirm indices
     assertEq(sortedIndices[0], 5);
+    assertEq(sortedIndices[1], 2);
+    assertEq(sortedIndices[2], 1);
+    assertEq(sortedIndices[3], 4);
+    assertEq(sortedIndices[4], 0);
+    assertEq(sortedIndices[5], 3);
+
+    // confirm data
+    assertEq(data[0], 1);
+    assertEq(data[1], 3);
+    assertEq(data[2], 5);
+    assertEq(data[3], 7);
+    assertEq(data[4], 10);
+    assertEq(data[5], 100);
   }
 
-  // function testSortOdd() {
-  //   uint[] memory data = uint[](6);
-  //   data = 
-  // }
+  function testSortOdd() public {
+    uint[] memory data = new uint[](5);
+    data[0] = 567;
+    data[1] = 243;
+    data[2] = 1;
+    data[3] = 0;
+    data[4] = 1456;
+
+    uint[] memory sortedIndices;
+    (data, sortedIndices) = tester.sort(data);
+
+    // confirm indices
+    assertEq(sortedIndices[0], 3);
+    assertEq(sortedIndices[1], 2);
+    assertEq(sortedIndices[2], 1);
+    assertEq(sortedIndices[3], 0);
+    assertEq(sortedIndices[4], 4);
+
+    // confirm data
+    assertEq(data[0], 0);
+    assertEq(data[1], 1);
+    assertEq(data[2], 243);
+    assertEq(data[3], 567);
+    assertEq(data[4], 1456);
+  }
 }
