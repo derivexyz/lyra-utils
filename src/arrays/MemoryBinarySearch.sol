@@ -9,19 +9,18 @@ pragma solidity ^0.8.13;
  */
 
 library MemoryBinarySearch {
-
   /**
-    * @dev Searches a sorted `array` and returns the first index that contains
-    * a value greater or equal to `element`. If no such index exists (i.e. all
-    * values in the array are strictly less than `element`), the array length is
-    * returned. Time complexity O(log n).
-    *
-    * `array` is expected to be sorted in ascending order, and to contain no
-    * repeated elements.
-    */
+   * @dev Searches a sorted `array` and returns the first index that contains
+   * a value greater or equal to `element`. If no such index exists (i.e. all
+   * values in the array are strictly less than `element`), the array length is
+   * returned. Time complexity O(log n).
+   *
+   * `array` is expected to be sorted in ascending order, and to contain no
+   * repeated elements.
+   */
   function findUpperBound(uint[] memory array, uint element) public pure returns (uint) {
     if (array.length == 0) {
-        return 0;
+      return 0;
     }
 
     uint low = 0;

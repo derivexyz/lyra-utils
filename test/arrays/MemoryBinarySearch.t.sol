@@ -9,8 +9,7 @@ import "src/arrays/MemoryBinarySearch.sol";
  * @dev for current `forge coverage` to work, i needs to call an external contract then invoke internal library
  */
 contract MemoryBinarySearchTester {
-  function findUpperBound(uint[] memory array, uint element) 
-    external pure returns (uint index) {
+  function findUpperBound(uint[] memory array, uint element) external pure returns (uint index) {
     return MemoryBinarySearch.findUpperBound(array, element);
   }
 }
