@@ -8,7 +8,6 @@ pragma solidity ^0.8.13;
  */
 
 library QuickSort {
-
   /**
    * @dev Sort both array and return sorted array of indexes
    *      The data is not sorted in-memory due to recursion - a new array is returned.
@@ -23,7 +22,6 @@ library QuickSort {
     return (data, sortedIndices);
   }
 
-
   /**
    * @dev Use quicksort to sort array of values and indices
    *      Inspired by: https://gist.github.com/subhodi/b3b86cc13ad2636420963e692a4d896f
@@ -32,10 +30,10 @@ library QuickSort {
    * @param left left bound
    * @param right right bound
    */
-  function sort(uint[] memory arr, uint[] memory indices, int left, int right) public view {    
+  function sort(uint[] memory arr, uint[] memory indices, int left, int right) public view {
     int i = left;
     int j = right;
-    if(i==j) return;
+    if (i == j) return;
     uint pivot = arr[uint(left + (right - left) / 2)];
     while (i <= j) {
       while (arr[uint(i)] < pivot) i++;
@@ -47,10 +45,12 @@ library QuickSort {
         j--;
       }
     }
-    if (left < j)
+    if (left < j) {
       sort(arr, indices, left, j);
-    if (i < right)
+    }
+    if (i < right) {
       sort(arr, indices, i, right);
+    }
   }
 
   /**
@@ -58,7 +58,7 @@ library QuickSort {
    *      E.g. with length 3 will generate array: [0, 1, 2]
    * @param length number of values to sort
    * @return initialIndices array of ordered indices
-   */  
+   */
   function initIndices(uint length) public pure returns (uint[] memory initialIndices) {
     initialIndices = new uint[](length);
     for (uint i; i < length; i++) {

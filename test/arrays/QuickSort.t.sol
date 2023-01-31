@@ -9,14 +9,9 @@ import "src/arrays/QuickSort.sol";
  * @dev for current `forge coverage` to work, i needs to call an external contract then invoke internal library
  */
 contract QuickSortTester {
-  function sort(uint[] memory data)
-    external
-    view
-    returns (uint[] memory sortedData, uint[] memory sortedIndices)
-  {
+  function sort(uint[] memory data) external view returns (uint[] memory sortedData, uint[] memory sortedIndices) {
     return QuickSort.sort(data);
   }
-
 }
 
 contract QuickSortTest is Test {
@@ -105,7 +100,7 @@ contract QuickSortTest is Test {
   }
 
   // useful for gas estimates for board sorting
-  function testWrostCaseGasArrayOf30() public {
+  function testWrostCaseGasArrayOf30() public view {
     // using sorted array as this is worst time complexity
     uint[] memory data = new uint[](30);
     for (uint i; i < data.length; i++) {
