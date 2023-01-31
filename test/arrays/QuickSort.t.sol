@@ -103,4 +103,15 @@ contract QuickSortTest is Test {
     assertEq(data[2], 243);
     assertEq(data[3], 243);
   }
+
+  // useful for gas estimates for board sorting
+  function testWrostCaseGasArrayOf30() public {
+    // using sorted array as this is worst time complexity
+    uint[] memory data = new uint[](30);
+    for (uint i; i < data.length; i++) {
+      data[i] = i;
+    }
+
+    (uint[] memory sortedData, uint[] memory sortedIndices) = tester.sort(data);
+  }
 }
