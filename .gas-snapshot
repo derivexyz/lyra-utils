@@ -1,0 +1,6 @@
+UnorderedMemoryArrayTest:testAddUniqueAddrLengthTooLarge() (gas: 14592)
+UnorderedMemoryArrayTest:testAddUniqueAddrLengthTooSmall() (gas: 9920)
+UnorderedMemoryArrayTest:testAddUniqueAddrToArray() (gas: 14133)
+UnorderedMemoryArrayTest:testAddUniqueUintLengthTooLarge() (gas: 13513)
+UnorderedMemoryArrayTest:testAddUniqueUintLengthTooSmall() (gas: 9388)
+UnorderedMemoryArrayTest:testAddUniqueUnitToArray() (gas: 13102)
