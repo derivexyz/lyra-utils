@@ -33,6 +33,11 @@ contract UnorderedMemoryArrayTester {
     // return array too, just so we can verify in tests
     return (array, newArrayLen);
   }
+
+  function trimArray(uint[] memory array, uint finalLength) external pure returns (uint[] memory){
+    UnorderedMemoryArray.trimArray(array, finalLength);
+    return array;
+  }
 }
 
 contract UnorderedMemoryArrayTest is Test {
@@ -151,5 +156,19 @@ contract UnorderedMemoryArrayTest is Test {
     assertEq(arr[0], address(1)); // index 0 remains empty
     assertEq(arr[1], element); // 1 got added to index 1
     assertEq(len, 2);
+  }
+
+  function testTrimArray() public {
+    uint[] memory array = new uint[](3);
+    array[0] = 5;
+    array[1] = 10;
+    array[2] = 20;
+
+    uint[] memory res = tester.trimArray(array, 1);
+    assertEq(res.length, 1);
+    assertEq(res[0], 5);
+
+    uint[] memory res2 = tester.trimArray(array, 0);
+    assertEq(res2.length, 0);
   }
 }

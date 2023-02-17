@@ -92,4 +92,13 @@ library UnorderedMemoryArray {
       return -1;
     }
   }
+
+  /**
+   * @dev shorten a memory array length in place
+   */
+  function trimArray(uint[] memory array, uint finalLength) internal pure {
+    assembly {
+      mstore(array, finalLength)
+    }
+  }
 }
