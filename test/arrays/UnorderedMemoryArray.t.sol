@@ -34,7 +34,7 @@ contract UnorderedMemoryArrayTester {
     return (array, newArrayLen);
   }
 
-  function trimArray(uint[] memory array, uint finalLength) external pure returns (uint[] memory){
+  function trimArray(uint[] memory array, uint finalLength) external pure returns (uint[] memory) {
     UnorderedMemoryArray.trimArray(array, finalLength);
     return array;
   }

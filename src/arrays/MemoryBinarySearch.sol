@@ -5,7 +5,7 @@ pragma solidity ^0.8.13;
  * @title MemoryBinarySearch
  * @author Lyra
  * @notice Binary search utilities for memory arrays.
- *         Close copy of OZ/Arrays.sol storage binary search.
+ * Close copy of OZ/Arrays.sol storage binary search.
  */
 
 library MemoryBinarySearch {

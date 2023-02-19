@@ -10,7 +10,7 @@ pragma solidity ^0.8.13;
 library UnorderedMemoryArray {
   /**
    * @dev Add unique element to existing "array" if and increase max index
-   *      array memory will be updated in place
+   * array memory will be updated in place
    * @param array array of number
    * @param newElement number to check
    * @param arrayLen previously recorded array length with non-zero value
@@ -34,7 +34,7 @@ library UnorderedMemoryArray {
 
   /**
    * @dev Add unique element to existing "array" if and increase max index
-   *      array memory will be updated in place
+   * array memory will be updated in place
    * @param array array of address
    * @param newElement address to check
    * @param arrayLen previously recorded array length with non-zero value
