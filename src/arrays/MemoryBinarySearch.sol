@@ -18,7 +18,7 @@ library MemoryBinarySearch {
    * `array` is expected to be sorted in ascending order, and to contain no
    * repeated elements.
    */
-  function findUpperBound(uint[] memory array, uint element) public pure returns (uint) {
+  function findUpperBound(uint[] memory array, uint element) internal pure returns (uint) {
     if (array.length == 0) {
       return 0;
     }

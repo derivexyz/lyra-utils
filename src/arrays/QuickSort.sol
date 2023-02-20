@@ -16,7 +16,7 @@ library QuickSort {
    * @return sortedData new array with sorted data
    * @return sortedIndices array of sorted indices
    */
-  function sort(uint[] memory data) public view returns (uint[] memory sortedData, uint[] memory sortedIndices) {
+  function sort(uint[] memory data) internal view returns (uint[] memory sortedData, uint[] memory sortedIndices) {
     sortedIndices = initIndices(data.length);
     sort(data, sortedIndices, int(0), int(data.length - 1));
     return (data, sortedIndices);
@@ -30,7 +30,7 @@ library QuickSort {
    * @param left left bound
    * @param right right bound
    */
-  function sort(uint[] memory arr, uint[] memory indices, int left, int right) public view {
+  function sort(uint[] memory arr, uint[] memory indices, int left, int right) internal view {
     int i = left;
     int j = right;
     if (i == j) {
@@ -65,7 +65,7 @@ library QuickSort {
    * @param length number of values to sort
    * @return initialIndices array of ordered indices
    */
-  function initIndices(uint length) public pure returns (uint[] memory initialIndices) {
+  function initIndices(uint length) internal pure returns (uint[] memory initialIndices) {
     initialIndices = new uint[](length);
     for (uint i; i < length; i++) {
       initialIndices[i] = i;

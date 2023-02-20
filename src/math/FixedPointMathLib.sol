@@ -36,7 +36,9 @@ library FixedPointMathLib {
   function ln(int x) internal pure returns (int r) {
     unchecked {
       if (x < 1) {
-        if (x < 0) revert LnNegativeUndefined();
+        if (x < 0) {
+          revert LnNegativeUndefined();
+        }
         revert Overflow();
       }
 
@@ -126,7 +128,9 @@ library FixedPointMathLib {
 
       // When the result is > (2**255 - 1) / 1e18 we can not represent it
       // as an int256. This happens when x >= floor(log((2**255 -1) / 1e18) * 1e18) ~ 135.
-      if (x >= 135305999368893231589) revert ExpOverflow();
+      if (x >= 135305999368893231589) {
+        revert ExpOverflow();
+      }
 
       // x is now in the range (-42, 136) * 1e18. Convert to (-42, 136) * 2**96
       // for more intermediate precision and a binary basis. This base conversion
@@ -259,7 +263,7 @@ library FixedPointMathLib {
    * original paper: http://www.codeplanet.eu/files/download/accuratecumnorm.pdf
    * consumes 1800 gas
    */
-  function stdNormalCDF(int x) public pure returns (uint) {
+  function stdNormalCDF(int x) internal pure returns (uint) {
     unchecked {
       uint z = abs(x);
       uint c;
@@ -276,9 +280,8 @@ library FixedPointMathLib {
         z = (z << 46) / 5 ** 18;
         e = (e << 46) / 5 ** 18;
 
-        if (
-          z < 130438178253327725388 // 7071067811865470000 in decimal (7.07)
-        ) {
+        if (z < 130438178253327725388) // 7071067811865470000 in decimal (7.07)
+        {
           // Hart's algorithm for x \in (-7.07, 7.07)
           uint n;
           uint d;
