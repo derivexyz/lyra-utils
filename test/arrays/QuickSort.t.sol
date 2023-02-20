@@ -107,6 +107,6 @@ contract QuickSortTest is Test {
       data[i] = i;
     }
 
-    (uint[] memory sortedData, uint[] memory sortedIndices) = tester.sort(data);
+    tester.sort(data);
   }
 }

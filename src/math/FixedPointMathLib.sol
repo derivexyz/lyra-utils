@@ -1,9 +1,25 @@
-//SPDX-License-Identifier: ISC
-pragma solidity 0.8.16;
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.13;
 
-// Slightly modified version of:
-// - https://github.com/recmo/experiment-solexp/blob/605738f3ed72d6c67a414e992be58262fbc9bb80/src/FixedPointMathLib.sol
 library FixedPointMathLib {
+  /// @dev Magic numbers for normal CDF
+  uint private constant N0 = 4062099735652764000328;
+  uint private constant N1 = 4080670594171652639712;
+  uint private constant N2 = 2067498006223917203771;
+  uint private constant N3 = 625581961353917287603;
+  uint private constant N4 = 117578849504046139487;
+  uint private constant N5 = 12919787143353136591;
+  uint private constant N6 = 650478250178244362;
+  uint private constant M0 = 8124199471305528000657;
+  uint private constant M1 = 14643514515380871948050;
+  uint private constant M2 = 11756730424506726822413;
+  uint private constant M3 = 5470644798650576484341;
+  uint private constant M4 = 1600821957476871612085;
+  uint private constant M5 = 296331772558254578451;
+  uint private constant M6 = 32386342837845824709;
+  uint private constant M7 = 1630477228166597028;
+  uint private constant SQRT_TWOPI_BASE2 = 46239130270042206915;
+
   /// @dev Computes ln(x) for a 1e27 fixed point. Loses 9 last significant digits of precision.
   function lnPrecise(int x) internal pure returns (int r) {
     return ln(x / 1e9) * 1e9;
@@ -20,9 +36,7 @@ library FixedPointMathLib {
   function ln(int x) internal pure returns (int r) {
     unchecked {
       if (x < 1) {
-        if (x < 0) {
-          revert LnNegativeUndefined();
-        }
+        if (x < 0) revert LnNegativeUndefined();
         revert Overflow();
       }
 
@@ -99,6 +113,7 @@ library FixedPointMathLib {
   }
 
   // Computes e^x in 1e18 fixed point.
+  // consumes 500 gas
   function exp(int x) internal pure returns (uint r) {
     unchecked {
       // Input x is in fixed point format, with scale factor 1/1e18.
@@ -111,9 +126,7 @@ library FixedPointMathLib {
 
       // When the result is > (2**255 - 1) / 1e18 we can not represent it
       // as an int256. This happens when x >= floor(log((2**255 -1) / 1e18) * 1e18) ~ 135.
-      if (x >= 135305999368893231589) {
-        revert ExpOverflow();
-      }
+      if (x >= 135305999368893231589) revert ExpOverflow();
 
       // x is now in the range (-42, 136) * 1e18. Convert to (-42, 136) * 2**96
       // for more intermediate precision and a binary basis. This base conversion
@@ -157,6 +170,166 @@ library FixedPointMathLib {
       // We do all of this at once, with an intermediate result in 2**213 basis
       // so the final right shift is always by a positive amount.
       r = (uint(r) * 3822833074963236453042738258902158003155416615667) >> uint(195 - k);
+    }
+  }
+
+  /// @notice Calculates the square root of x, rounding down (borrowed from https://ethereum.stackexchange.com/a/97540)
+  /// @dev Uses the Babylonian method https://en.wikipedia.org/wiki/Methods_of_computing_square_roots#Babylonian_method.
+  /// @param x The uint256 number for which to calculate the square root.
+  /// @return result The result as an uint256.
+  function _sqrt(uint x) internal pure returns (uint result) {
+    if (x == 0) {
+      return 0;
+    }
+
+    // Calculate the square root of the perfect square of a power of two that is the closest to x.
+    uint xAux = uint(x);
+    result = 1;
+    if (xAux >= 0x100000000000000000000000000000000) {
+      xAux >>= 128;
+      result <<= 64;
+    }
+    if (xAux >= 0x10000000000000000) {
+      xAux >>= 64;
+      result <<= 32;
+    }
+    if (xAux >= 0x100000000) {
+      xAux >>= 32;
+      result <<= 16;
+    }
+    if (xAux >= 0x10000) {
+      xAux >>= 16;
+      result <<= 8;
+    }
+    if (xAux >= 0x100) {
+      xAux >>= 8;
+      result <<= 4;
+    }
+    if (xAux >= 0x10) {
+      xAux >>= 4;
+      result <<= 2;
+    }
+    if (xAux >= 0x4) {
+      result <<= 1;
+    }
+
+    // The operations can never overflow because the result is max 2^127 when it enters this block.
+    unchecked {
+      result = (result + x / result) >> 1;
+      result = (result + x / result) >> 1;
+      result = (result + x / result) >> 1;
+      result = (result + x / result) >> 1;
+      result = (result + x / result) >> 1;
+      result = (result + x / result) >> 1;
+      result = (result + x / result) >> 1; // Seven iterations should be enough
+      uint roundedDownResult = x / result;
+      return result >= roundedDownResult ? roundedDownResult : result;
+    }
+  }
+
+  /**
+   * @dev Returns the square root of a value using Newton's method.
+   */
+  function sqrt(uint x) internal pure returns (uint) {
+    // Add in an extra unit factor for the square root to gobble;
+    // otherwise, sqrt(x * UNIT) = sqrt(x) * sqrt(UNIT)
+    return _sqrt(x * 1e18);
+  }
+
+  /**
+   * @dev Compute the absolute value of `val`.
+   *
+   * @param val The number to absolute value.
+   */
+  function abs(int val) internal pure returns (uint) {
+    return uint(val < 0 ? -val : val);
+  }
+
+  /**
+   * @dev The standard normal distribution of the value.
+   */
+  function stdNormal(int x) internal pure returns (uint) {
+    int y = ((x >> 1) * x) / 1e18;
+    return (exp(-y) * 1e18) / 2506628274631000502;
+  }
+
+  /**
+   * @dev The standard normal cumulative distribution of the value.
+   * borrowed from a C++ implementation https://stackoverflow.com/a/23119456
+   * original paper: http://www.codeplanet.eu/files/download/accuratecumnorm.pdf
+   * consumes 1800 gas
+   */
+  function stdNormalCDF(int x) public pure returns (uint) {
+    unchecked {
+      uint z = abs(x);
+      uint c;
+      if (z > 37 * 1e18) {
+        return (x <= 0) ? c : uint(1e18 - int(c));
+      } else {
+        // z^2 cannot overflow in this "else" block
+        uint e = exp(-int(((z >> 1) * z) / 1e18));
+
+        // convert to binary base with factor 1e18 / 2**64 = 5**18 / 2**46.
+        // z cant overflow with z < 37 * 1e18 range we're in
+        // e cant overflow since its at most 1.0 (at z=0)
+
+        z = (z << 46) / 5 ** 18;
+        e = (e << 46) / 5 ** 18;
+
+        if (
+          z < 130438178253327725388 // 7071067811865470000 in decimal (7.07)
+        ) {
+          // Hart's algorithm for x \in (-7.07, 7.07)
+          uint n;
+          uint d;
+
+          n = ((N6 * z) >> 64) + N5;
+          n = ((n * z) >> 64) + N4;
+          n = ((n * z) >> 64) + N3;
+          n = ((n * z) >> 64) + N2;
+          n = ((n * z) >> 64) + N1;
+          n = ((n * z) >> 64) + N0;
+
+          d = ((M7 * z) >> 64) + M6;
+          d = ((d * z) >> 64) + M5;
+          d = ((d * z) >> 64) + M4;
+          d = ((d * z) >> 64) + M3;
+          d = ((d * z) >> 64) + M2;
+          d = ((d * z) >> 64) + M1;
+          d = ((d * z) >> 64) + M0;
+
+          c = (n * e);
+          assembly {
+            // Div in assembly because solidity adds a zero check despite the `unchecked`
+            // denominator d is a polynomial with non-negative z and, all magic numbers are positive
+            // no need to scale since c = (n * e) is already 2^64 times larger
+            c := div(c, d)
+          }
+        } else {
+          // continued fracton approximation for abs(x) \in (7.07, 37)
+          uint f;
+          f = 11990383647911208550; // 13/20 ratio in base 2^64
+          // TODO can probaby use assembly here for division
+          f = (4 << 128) / (z + f);
+          f = (3 << 128) / (z + f);
+          f = (2 << 128) / (z + f);
+          f = (1 << 128) / (z + f);
+          f += z;
+          f = (f * SQRT_TWOPI_BASE2) >> 64;
+          e = (e << 64);
+          assembly {
+            // Div in assembly because solidity adds a zero check despite the `unchecked`
+            // denominator f is a finite continued fraction that attains min value of 0.4978 at z=37.0
+            // so it cannot underflow into 0
+            // no need to scale since e is made 2^64 times larger on the line above
+            c := div(e, f)
+          }
+        }
+      }
+
+      c = (c * (5 ** 18)) >> 46;
+      c = (x <= 0) ? c : uint(1e18 - int(c));
+      return c;
     }
   }
 
