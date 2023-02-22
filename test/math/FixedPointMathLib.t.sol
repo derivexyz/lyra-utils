@@ -6,7 +6,7 @@ import "forge-std/Test.sol";
 import "src/math/FixedPointMathLib.sol";
 
 /**
- * @dev for current `forge coverage` to wrok, i needs to call an external contract then invoke internal library
+ * @dev for current `forge coverage` to work, it needs to call an external contract then invoke internal library
  */
 contract FixedPointMathTester {
   function lnPrecise(int x) external pure returns (int r) {

@@ -6,7 +6,7 @@ import "forge-std/Test.sol";
 import "src/arrays/QuickSort.sol";
 
 /**
- * @dev for current `forge coverage` to work, i needs to call an external contract then invoke internal library
+ * @dev for current `forge coverage` to work, it needs to call an external contract then invoke internal library
  */
 contract QuickSortTester {
   function sort(uint[] memory data) external view returns (uint[] memory sortedData, uint[] memory sortedIndices) {

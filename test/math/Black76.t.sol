@@ -6,7 +6,7 @@ import "forge-std/Test.sol";
 import "src/math/Black76.sol";
 
 /**
- * @dev for current `forge coverage` to wrok, i needs to call an external contract then invoke internal library
+ * @dev for current `forge coverage` to work, it needs to call an external contract then invoke internal library
  */
 contract Black76Tester {
   using Black76 for Black76.Black76Inputs;
