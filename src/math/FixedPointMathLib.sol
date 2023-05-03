@@ -280,8 +280,9 @@ library FixedPointMathLib {
         z = (z << 46) / 5 ** 18;
         e = (e << 46) / 5 ** 18;
 
-        if (z < 130438178253327725388) // 7071067811865470000 in decimal (7.07)
-        {
+        if (
+          z < 130438178253327725388 // 7071067811865470000 in decimal (7.07)
+        ) {
           // Hart's algorithm for x \in (-7.07, 7.07)
           uint n;
           uint d;

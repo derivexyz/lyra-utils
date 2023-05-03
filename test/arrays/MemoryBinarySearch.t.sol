@@ -6,7 +6,7 @@ import "forge-std/Test.sol";
 import "src/arrays/MemoryBinarySearch.sol";
 
 /**
- * @dev for current `forge coverage` to work, i needs to call an external contract then invoke internal library
+ * @dev for current `forge coverage` to work, it needs to call an external contract then invoke internal library
  */
 contract MemoryBinarySearchTester {
   function findUpperBound(uint[] memory array, uint element) external pure returns (uint index) {
