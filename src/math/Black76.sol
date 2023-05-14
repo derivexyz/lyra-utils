@@ -20,14 +20,14 @@ library Black76 {
   struct Black76Inputs {
     // Number of seconds to the expiry of the option
     uint64 timeToExpirySec;
+    // The discount factor
+    uint64 discount;
     // Implied volatility over the period til expiry as a percentage
     uint128 volatility;
     // The forward price of the base asset
     uint128 fwdPrice;
     // The strikePrice price of the option
     uint128 strikePrice;
-    // The discount factor
-    uint64 discount;
   }
 
   uint private constant SECONDS_PER_YEAR = 365 days;
@@ -61,7 +61,7 @@ library Black76 {
    */
   function prices(Black76Inputs memory b76Input) public pure returns (uint callPrice, uint putPrice) {
     unchecked {
-      uint tAnnualised = _annualise(b76Input.timeToExpirySec);
+      uint tAnnualised = annualise(b76Input.timeToExpirySec);
       // products of <128 bit numbers, cannot overflow here when caseted to 256
       uint totalVol = uint(b76Input.volatility) * uint(FixedPointMathLib.sqrt(tAnnualised)) / 1e18;
       uint fwd = uint(b76Input.fwdPrice);
@@ -90,7 +90,6 @@ library Black76 {
 
       // cap the theo prices to resolve any potential rounding errors with super small/big spots/strikes
       callPrice = callPrice > fwdDiscounted ? fwdDiscounted : callPrice;
-      //// REMOVE fwdDiscounted CALCULATION FROM HERE
       putPrice = putPrice > strikeDiscounted ? strikeDiscounted : putPrice;
     }
   }
@@ -161,7 +160,7 @@ library Black76 {
    * @param secs # of seconds (usually from block.timestamp till option expiry).
    * @return yearFraction An 18-decimal year fraction.
    */
-  function _annualise(uint64 secs) internal pure returns (uint yearFraction) {
+  function annualise(uint64 secs) public pure returns (uint yearFraction) {
     unchecked {
       // unchecked saves 500 gas, cannot overflow since input is 64 bit
       return uint(secs) * 1e18 / SECONDS_PER_YEAR;

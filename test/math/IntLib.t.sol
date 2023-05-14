@@ -19,6 +19,16 @@ contract IntLibTester {
     uint res = IntLib.absMin(a, b);
     return res;
   }
+
+  function min(int a, int b) external pure returns (int) {
+    int res = IntLib.min(a, b);
+    return res;
+  }
+
+  function max(int a, int b) external pure returns (int) {
+    int res = IntLib.max(a, b);
+    return res;
+  }
 }
 
 contract IntLibTest is Test {
@@ -64,5 +74,45 @@ contract IntLibTest is Test {
     assertEq(tester.absMin(-200, -100), 100);
 
     assertEq(tester.absMin(200, 100), 100);
+  }
+
+  function testMin() public {
+    assertEq(tester.min(0, type(int).max), 0);
+    assertEq(tester.min(type(int).max, 0), 0);
+
+    assertEq(tester.min(10, 1000), 10);
+    assertEq(tester.min(1000, 10), 10);
+
+    assertEq(tester.min(-10, 1000), -10);
+    assertEq(tester.min(1000, -10), -10);
+
+    assertEq(tester.min(-10, -1000), -1000);
+    assertEq(tester.min(-1000, -10), -1000);
+
+    assertEq(tester.min(0, type(int).min), type(int).min);
+    assertEq(tester.min(type(int).min, 0), type(int).min);
+
+    assertEq(tester.min(type(int).max, type(int).min), type(int).min);
+    assertEq(tester.min(type(int).min, type(int).max), type(int).min);
+  }
+
+  function testMax() public {
+    assertEq(tester.max(0, type(int).max), type(int).max);
+    assertEq(tester.max(type(int).max, 0), type(int).max);
+
+    assertEq(tester.max(10, 1000), 1000);
+    assertEq(tester.max(1000, 10), 1000);
+
+    assertEq(tester.max(-10, 1000), 1000);
+    assertEq(tester.max(1000, -10), 1000);
+
+    assertEq(tester.max(-10, -1000), -10);
+    assertEq(tester.max(-1000, -10), -10);
+
+    assertEq(tester.max(0, type(int).min), 0);
+    assertEq(tester.max(type(int).min, 0), 0);
+
+    assertEq(tester.max(type(int).max, type(int).min), type(int).max);
+    assertEq(tester.max(type(int).min, type(int).max), type(int).max);
   }
 }

@@ -43,6 +43,11 @@ contract FixedPointMathTester {
     uint result = FixedPointMathLib.stdNormalCDF(x);
     return result;
   }
+
+  function decPow(int a, int b) external pure returns (uint r) {
+    uint result = FixedPointMathLib.decPow(a, b);
+    return result;
+  }
 }
 
 contract FixedPointMathLibTest is Test {
@@ -171,5 +176,25 @@ contract FixedPointMathLibTest is Test {
 
     // stdNormal (0.5) = 0.3520653267642994777747
     assertEq(tester.stdNormal(0.5e18), 352065326_764299477);
+  }
+
+  function testDecPow() public {
+    uint accuracy = uint(1e6);
+
+    assertApproxEqAbs(tester.decPow(1e18, 0), 1e18, accuracy);
+    assertApproxEqAbs(tester.decPow(1e18, 10000e18), 1e18, accuracy);
+    assertApproxEqAbs(tester.decPow(1.461123e18, 6.1340812e18), 10.237692095615253166e18, accuracy);
+    // Arithmetic overflow when doing a * ln(b)
+    vm.expectRevert();
+    tester.decPow(1e36, 1e70);
+    // Exponential overflow
+    vm.expectRevert(FixedPointMathLib.ExpOverflow.selector);
+    tester.decPow(1e36, 1e36);
+
+    vm.expectRevert(FixedPointMathLib.LnNegativeUndefined.selector);
+    tester.decPow(-1, 1e36);
+
+    vm.expectRevert(FixedPointMathLib.Overflow.selector);
+    tester.decPow(0, 1e36);
   }
 }

@@ -10,7 +10,8 @@ import "src/arrays/MemoryBinarySearch.sol";
  */
 contract MemoryBinarySearchTester {
   function findUpperBound(uint[] memory array, uint element) external pure returns (uint index) {
-    return MemoryBinarySearch.findUpperBound(array, element);
+    uint res = MemoryBinarySearch.findUpperBound(array, element);
+    return res;
   }
 }
 
