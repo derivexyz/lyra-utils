@@ -29,4 +29,12 @@ library IntLib {
     uint absB = abs(b);
     absMinAmount = (absA <= absB) ? absA : absB;
   }
+
+  function min(int a, int b) internal pure returns (int minVal) {
+    return a < b ? a : b;
+  }
+
+  function max(int a, int b) internal pure returns (int maxVal) {
+    return a > b ? a : b;
+  }
 }

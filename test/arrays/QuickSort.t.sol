@@ -9,8 +9,9 @@ import "src/arrays/QuickSort.sol";
  * @dev for current `forge coverage` to work, it needs to call an external contract then invoke internal library
  */
 contract QuickSortTester {
-  function sort(uint[] memory data) external view returns (uint[] memory sortedData, uint[] memory sortedIndices) {
-    return QuickSort.sort(data);
+  function sort(uint[] memory data) external view returns (uint[] memory, uint[] memory) {
+    (uint[] memory sortedData, uint[] memory sortedIndices) = QuickSort.sort(data);
+    return (sortedData, sortedIndices);
   }
 }
 

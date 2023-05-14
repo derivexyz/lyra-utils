@@ -313,7 +313,6 @@ library FixedPointMathLib {
           // continued fracton approximation for abs(x) \in (7.07, 37)
           uint f;
           f = 11990383647911208550; // 13/20 ratio in base 2^64
-          // TODO can probaby use assembly here for division
           f = (4 << 128) / (z + f);
           f = (3 << 128) / (z + f);
           f = (2 << 128) / (z + f);
@@ -335,6 +334,11 @@ library FixedPointMathLib {
       c = (x <= 0) ? c : uint(1e18 - int(c));
       return c;
     }
+  }
+
+  /// @dev Calculates a^b
+  function decPow(int a, int b) internal pure returns (uint) {
+    return exp(ln(a) * b / 1e18);
   }
 
   error Overflow();
