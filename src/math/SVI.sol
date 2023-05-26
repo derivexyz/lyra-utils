@@ -35,7 +35,7 @@ library SVI {
    */
   function getVol(uint strike, int a, uint b, int rho, int m, uint sigma, uint forwardPrice, uint64 tao)
     internal
-    view
+    pure
     returns (uint128)
   {
     // k = ln(strike / fwd)

@@ -20,8 +20,10 @@ struct SVITestParams {
  * @dev for current `forge coverage` to work, it needs to call an external contract then invoke internal library
  */
 contract SVITester {
-  function getVol(uint strike, SVITestParams memory params) external view returns (uint vol) {
-    return SVI.getVol(strike, params.a, params.b, params.rho, params.m, params.sigma, params.forwardPrice, params.tao);
+  function getVol(uint strike, SVITestParams memory params) external pure returns (uint vol) {
+    uint res =
+      SVI.getVol(strike, params.a, params.b, params.rho, params.m, params.sigma, params.forwardPrice, params.tao);
+    return res;
   }
 }
 
