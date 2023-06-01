@@ -101,4 +101,13 @@ library UnorderedMemoryArray {
       mstore(array, finalLength)
     }
   }
+
+  /**
+   * @dev shorten a memory array length in place
+   */
+  function trimArray(address[] memory array, uint finalLength) internal pure {
+    assembly {
+      mstore(array, finalLength)
+    }
+  }
 }

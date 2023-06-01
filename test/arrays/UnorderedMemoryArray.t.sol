@@ -38,6 +38,11 @@ contract UnorderedMemoryArrayTester {
     UnorderedMemoryArray.trimArray(array, finalLength);
     return array;
   }
+
+  function trimArray(address[] memory array, uint finalLength) external pure returns (address[] memory) {
+    UnorderedMemoryArray.trimArray(array, finalLength);
+    return array;
+  }
 }
 
 contract UnorderedMemoryArrayTest is Test {
@@ -158,7 +163,7 @@ contract UnorderedMemoryArrayTest is Test {
     assertEq(len, 2);
   }
 
-  function testTrimArray() public {
+  function testTrimUintArray() public {
     uint[] memory array = new uint[](3);
     array[0] = 5;
     array[1] = 10;
@@ -167,8 +172,31 @@ contract UnorderedMemoryArrayTest is Test {
     uint[] memory res = tester.trimArray(array, 1);
     assertEq(res.length, 1);
     assertEq(res[0], 5);
+    vm.expectRevert(stdError.indexOOBError);
+    res[1];
 
     uint[] memory res2 = tester.trimArray(array, 0);
+    assertEq(res2.length, 0);
+  }
+
+  function testTrimAddressArray() public {
+    address[] memory array = new address[](5);
+    array[0] = address(0x5);
+    array[1] = address(0x20);
+    array[2] = address(0x50);
+    array[3] = address(0x99);
+    array[4] = address(0x00);
+
+    address[] memory res = tester.trimArray(array, 3);
+    assertEq(res.length, 3);
+    assertEq(res[0], address(0x5));
+    assertEq(res[1], address(0x20));
+    assertEq(res[2], address(0x50));
+
+    vm.expectRevert(stdError.indexOOBError);
+    res[3];
+
+    address[] memory res2 = tester.trimArray(array, 0);
     assertEq(res2.length, 0);
   }
 }
