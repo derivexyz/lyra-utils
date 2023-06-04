@@ -36,7 +36,7 @@ library SVI {
   function getVol(uint strike, int a, uint b, int rho, int m, uint sigma, uint forwardPrice, uint64 tao)
     internal
     pure
-    returns (uint128)
+    returns (uint)
   {
     // k = ln(strike / fwd)
     int k = FixedPointMathLib.ln(int(strike.divideDecimal(forwardPrice)));
@@ -59,6 +59,6 @@ library SVI {
     }
 
     // sqrt((a + b * (sqrt((k - m)^2 + sigma^2) + rho * (k - m)))/tao)
-    return uint128(FixedPointMathLib.sqrt(uint(w).divideDecimal(uint(tao))));
+    return FixedPointMathLib.sqrt(uint(w).divideDecimal(uint(tao)));
   }
 }
