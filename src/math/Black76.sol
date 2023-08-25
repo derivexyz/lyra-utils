@@ -59,7 +59,7 @@ library Black76 {
    * @return callPrice Call price for given Black76 parameters (18-decimal precision).
    * @return putPrice Put price for given Black76 parameters (18-decimal precision).
    */
-  function prices(Black76Inputs memory b76Input) public pure returns (uint callPrice, uint putPrice) {
+  function prices(Black76Inputs memory b76Input) internal pure returns (uint callPrice, uint putPrice) {
     unchecked {
       uint tAnnualised = annualise(b76Input.timeToExpirySec);
       // products of <128 bit numbers, cannot overflow here when caseted to 256
@@ -160,7 +160,7 @@ library Black76 {
    * @param secs # of seconds (usually from block.timestamp till option expiry).
    * @return yearFraction An 18-decimal year fraction.
    */
-  function annualise(uint64 secs) public pure returns (uint yearFraction) {
+  function annualise(uint64 secs) internal pure returns (uint yearFraction) {
     unchecked {
       // unchecked saves 500 gas, cannot overflow since input is 64 bit
       return uint(secs) * 1e18 / SECONDS_PER_YEAR;
