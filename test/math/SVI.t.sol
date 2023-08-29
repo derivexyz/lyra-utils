@@ -129,7 +129,6 @@ contract SVITest is Test {
     uint vol = tester.getVol(1800e18, params);
   }
 
-
   function testFuzzGetVol(uint strike, uint forwardPrice) public {
     // fuzz test the get vol function will not revert
     vm.assume(forwardPrice < 10000_00e18);

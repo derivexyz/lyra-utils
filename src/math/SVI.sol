@@ -22,7 +22,7 @@ library SVI {
   error SVI_InvalidParameters();
   error SVI_NoForwardPrice();
 
-  uint256 constant internal MAX_VOL = 10e18;
+  uint internal constant MAX_VOL = 10e18;
 
   /**
    * @dev compute the vol for a given strike and set of SVI parameters
