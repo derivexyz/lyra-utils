@@ -41,13 +41,13 @@ library SVI {
     pure
     returns (uint)
   {
-    // k = ln(strike / fwd)
     if (strike == 0) return MAX_VOL;
     if (forwardPrice == 0) revert SVI_NoForwardPrice();
 
-    // cap strike at 10% of forward price to calculate k to avoid overflow
+    // cap lower bound of strike at 2% of forward price to calculate k to avoid overflow
     strike = UintLib.max(strike, forwardPrice / 50);
 
+    // k = ln(strike / fwd)
     int k = FixedPointMathLib.ln(int(strike.divideDecimal(forwardPrice)));
 
     int k_sub_m = int(k) - m;
