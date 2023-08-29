@@ -5,7 +5,7 @@ pragma solidity ^0.8.0;
 import "src/decimals/SignedDecimalMath.sol";
 import "src/decimals/DecimalMath.sol";
 import "./FixedPointMathLib.sol";
-
+import "./Uintlib.sol";
 import "forge-std/console2.sol";
 
 /**
@@ -20,6 +20,9 @@ library SVI {
   using FixedPointMathLib for int;
 
   error SVI_InvalidParameters();
+  error SVI_NoForwardPrice();
+
+  uint256 constant internal MAX_VOL = 10e18;
 
   /**
    * @dev compute the vol for a given strike and set of SVI parameters
@@ -39,6 +42,12 @@ library SVI {
     returns (uint)
   {
     // k = ln(strike / fwd)
+    if (strike == 0) return MAX_VOL;
+    if (forwardPrice == 0) revert SVI_NoForwardPrice();
+
+    // cap strike at 10% of forward price to calculate k to avoid overflow
+    strike = UintLib.max(strike, forwardPrice / 50);
+
     int k = FixedPointMathLib.ln(int(strike.divideDecimal(forwardPrice)));
 
     int k_sub_m = int(k) - m;
@@ -59,6 +68,7 @@ library SVI {
     }
 
     // sqrt((a + b * (sqrt((k - m)^2 + sigma^2) + rho * (k - m)))/tao)
-    return FixedPointMathLib.sqrt(uint(w).divideDecimal(uint(tao)));
+    uint vol = FixedPointMathLib.sqrt(uint(w).divideDecimal(uint(tao)));
+    return UintLib.min(vol, MAX_VOL);
   }
 }

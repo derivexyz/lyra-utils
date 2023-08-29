@@ -115,4 +115,41 @@ contract SVITest is Test {
     vm.expectRevert(SVI.SVI_InvalidParameters.selector);
     tester.getVol(1800e18, params);
   }
+
+  function testZeroStrikeVolCapped() public {
+    uint forwardPrice = 2000e18;
+    SVITestParams memory params = _getDefaultSVIParams(forwardPrice);
+    uint vol = tester.getVol(0, params);
+    assertEq(vol, SVI.MAX_VOL);
+  }
+
+  function testRevertWhenForwardPriceIsZero() public {
+    SVITestParams memory params = _getDefaultSVIParams(0);
+    vm.expectRevert(SVI.SVI_NoForwardPrice.selector);
+    uint vol = tester.getVol(1800e18, params);
+  }
+
+
+  function testFuzzGetVol(uint strike, uint forwardPrice) public {
+    // fuzz test the get vol function will not revert
+    vm.assume(forwardPrice < 10000_00e18);
+    vm.assume(forwardPrice != 0);
+    vm.assume(strike < 1000_000e18);
+
+    SVITestParams memory params = _getDefaultSVIParams(forwardPrice);
+
+    tester.getVol(strike, params);
+  }
+
+  function _getDefaultSVIParams(uint forwardPrice) internal view returns (SVITestParams memory params) {
+    params = SVITestParams({
+      tao: 0.00821917808219178e18,
+      a: 0.00821917808219178e18,
+      b: 0.01232876712328767e18,
+      rho: -int(0.000821917808219178e18),
+      m: -int(0.000410958904109589e18),
+      sigma: 0.000410958904109589e18,
+      forwardPrice: forwardPrice
+    });
+  }
 }
