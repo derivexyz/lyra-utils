@@ -5,7 +5,7 @@ pragma solidity ^0.8.0;
 import "src/decimals/SignedDecimalMath.sol";
 import "src/decimals/DecimalMath.sol";
 import "./FixedPointMathLib.sol";
-import "./Uintlib.sol";
+import "./UintLib.sol";
 import "forge-std/console2.sol";
 
 /**
