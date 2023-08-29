@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.13;
+pragma solidity ^0.8.0;
 
 /**
  * @title UnorderedMemoryArray
@@ -97,6 +97,15 @@ library UnorderedMemoryArray {
    * @dev shorten a memory array length in place
    */
   function trimArray(uint[] memory array, uint finalLength) internal pure {
+    assembly {
+      mstore(array, finalLength)
+    }
+  }
+
+  /**
+   * @dev shorten a memory array length in place
+   */
+  function trimArray(address[] memory array, uint finalLength) internal pure {
     assembly {
       mstore(array, finalLength)
     }

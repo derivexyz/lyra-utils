@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: ISC
-pragma solidity ^0.8.13;
+pragma solidity ^0.8.0;
 
 // Libraries
 import "src/decimals/SignedDecimalMath.sol";
