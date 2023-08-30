@@ -152,7 +152,7 @@ contract SVITest is Test {
     assertEq(vol / 1e18, 2); // 200%
   }
 
-  function testFuzzGetVol(uint strike, uint forwardPrice, uint64 tau) view public {
+  function testFuzzGetVol(uint strike, uint forwardPrice, uint64 tau) public view {
     // fuzz test the get vol function will not revert
     vm.assume(tau > 0);
     vm.assume(tau < 5e18); // expiry < 5 years
