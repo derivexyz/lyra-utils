@@ -5,9 +5,7 @@ pragma solidity ^0.8.0;
 import "src/decimals/SignedDecimalMath.sol";
 import "src/decimals/DecimalMath.sol";
 import "./FixedPointMathLib.sol";
-import "./UintLib.sol";
 import "./IntLib.sol";
-import "forge-std/console2.sol";
 
 /**
  * @title SVI
