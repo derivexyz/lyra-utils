@@ -129,25 +129,43 @@ contract SVITest is Test {
     uint vol = tester.getVol(1800e18, params);
   }
 
-  function testFuzzGetVol(uint strike, uint forwardPrice) public {
+  function testLongDatedOptionShouldBeCapped() public {
+    SVITestParams memory params = _getDefaultSVIParams(2000e18);
+    params.tao = 5e18;
+    uint vol = tester.getVol(1800e18, params);
+    console2.log("vol", vol);
+  }
+
+  function testInputA() public {
+    SVITestParams memory params = _getDefaultSVIParams(2000e18);
+    params.a = -0.01e18;
+    uint vol = tester.getVol(1800e18, params);
+    console2.log("vol", vol);
+  }
+
+  function testFuzzGetVol(uint strike, uint forwardPrice, uint64 tao) public {
     // fuzz test the get vol function will not revert
+    vm.assume(tao > 0);
+    vm.assume(tao < 100e18); // expiry < 5 years
     vm.assume(forwardPrice < 10000_00e18);
     vm.assume(forwardPrice != 0);
     vm.assume(strike < 1000_000e18);
 
     SVITestParams memory params = _getDefaultSVIParams(forwardPrice);
+    params.tao = tao;
 
-    tester.getVol(strike, params);
+    uint vol = tester.getVol(strike, params);
+    assert(vol <= SVI.MAX_VOL);
   }
 
   function _getDefaultSVIParams(uint forwardPrice) internal view returns (SVITestParams memory params) {
     params = SVITestParams({
-      tao: 0.00821917808219178e18,
       a: 0.00821917808219178e18,
       b: 0.01232876712328767e18,
       rho: -int(0.000821917808219178e18),
       m: -int(0.000410958904109589e18),
       sigma: 0.000410958904109589e18,
+      tao: 0.00821917808219178e18,
       forwardPrice: forwardPrice
     });
   }

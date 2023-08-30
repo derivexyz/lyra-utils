@@ -24,6 +24,8 @@ library SVI {
 
   uint internal constant MAX_VOL = 10e18;
 
+  int internal constant MAX_TOTAL_VAR = 25e18;
+
   /**
    * @dev compute the vol for a given strike and set of SVI parameters
    * @param strike desired strike for which to get vol for, in range [0, inf)
@@ -33,19 +35,16 @@ library SVI {
    * @param m SVI parameter in range (-inf, inf)
    * @param sigma SVI parameter in range (0, inf)
    * @param forwardPrice forward price in range [0, inf)
-   * @param tao time to expiry (in years) in range [0, inf)
+   * @param tau time to expiry (in years) in range [0, inf)
    * @return vol
    */
-  function getVol(uint strike, int a, uint b, int rho, int m, uint sigma, uint forwardPrice, uint64 tao)
+  function getVol(uint strike, int a, uint b, int rho, int m, uint sigma, uint forwardPrice, uint64 tau)
     internal
     pure
     returns (uint)
   {
     if (strike == 0) return MAX_VOL;
     if (forwardPrice == 0) revert SVI_NoForwardPrice();
-
-    // cap lower bound of strike at 2% of forward price to calculate k to avoid overflow
-    strike = UintLib.max(strike, forwardPrice / 50);
 
     // k = ln(strike / fwd)
     int k = FixedPointMathLib.ln(int(strike.divideDecimal(forwardPrice)));
@@ -65,10 +64,12 @@ library SVI {
 
     if (w < 0) {
       revert SVI_InvalidParameters();
+    } else if (w > MAX_TOTAL_VAR) {
+      w = MAX_TOTAL_VAR;
     }
 
-    // sqrt((a + b * (sqrt((k - m)^2 + sigma^2) + rho * (k - m)))/tao)
-    uint vol = FixedPointMathLib.sqrt(uint(w).divideDecimal(uint(tao)));
+    // sqrt((a + b * (sqrt((k - m)^2 + sigma^2) + rho * (k - m)))/tau)
+    uint vol = FixedPointMathLib.sqrt(uint(w).divideDecimal(uint(tau)));
     return UintLib.min(vol, MAX_VOL);
   }
 }
