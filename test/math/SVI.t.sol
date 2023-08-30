@@ -126,7 +126,7 @@ contract SVITest is Test {
   function testRevertWhenForwardPriceIsZero() public {
     SVITestParams memory params = _getDefaultSVIParams(0);
     vm.expectRevert(SVI.SVI_NoForwardPrice.selector);
-    uint vol = tester.getVol(1800e18, params);
+    tester.getVol(1800e18, params);
   }
 
   // function testMaxVarInSVIShouldBeCapped() public {
@@ -152,7 +152,7 @@ contract SVITest is Test {
     assertEq(vol / 1e18, 2); // 200%
   }
 
-  function testFuzzGetVol(uint strike, uint forwardPrice, uint64 tau) public {
+  function testFuzzGetVol(uint strike, uint forwardPrice, uint64 tau) view public {
     // fuzz test the get vol function will not revert
     vm.assume(tau > 0);
     vm.assume(tau < 5e18); // expiry < 5 years
@@ -163,13 +163,13 @@ contract SVITest is Test {
     SVITestParams memory params = _getDefaultSVIParams(forwardPrice);
     params.tau = tau;
 
-    uint vol = tester.getVol(strike, params);
+    tester.getVol(strike, params);
 
     // todo: what are the bonds?
     // assert(vol < 10e18);
   }
 
-  function _getDefaultSVIParams(uint forwardPrice) internal view returns (SVITestParams memory params) {
+  function _getDefaultSVIParams(uint forwardPrice) internal pure returns (SVITestParams memory params) {
     params = SVITestParams({
       a: 0.00821917808219178e18,
       b: 0.01232876712328767e18,
