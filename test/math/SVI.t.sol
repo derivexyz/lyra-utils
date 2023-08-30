@@ -7,7 +7,7 @@ import "forge-std/console2.sol";
 import "src/math/SVI.sol";
 
 struct SVITestParams {
-  uint64 tao;
+  uint64 tau;
   int a;
   uint b;
   int rho;
@@ -22,7 +22,7 @@ struct SVITestParams {
 contract SVITester {
   function getVol(uint strike, SVITestParams memory params) external pure returns (uint vol) {
     uint res =
-      SVI.getVol(strike, params.a, params.b, params.rho, params.m, params.sigma, params.forwardPrice, params.tao);
+      SVI.getVol(strike, params.a, params.b, params.rho, params.m, params.sigma, params.forwardPrice, params.tau);
     return res;
   }
 }
@@ -36,7 +36,7 @@ contract SVITest is Test {
 
   function testGetVols() public {
     SVITestParams memory params = SVITestParams({
-      tao: 0.00821917808219178e18,
+      tau: 0.00821917808219178e18,
       a: 0.00821917808219178e18,
       b: 0.01232876712328767e18,
       rho: -int(0.000821917808219178e18),
@@ -62,7 +62,7 @@ contract SVITest is Test {
     }
 
     params = SVITestParams({
-      tao: 0.038356164383561646e18,
+      tau: 0.038356164383561646e18,
       a: 0.027616438356164386e18,
       b: 0.041424657534246574e18,
       rho: 0.003452054794520548e18,
@@ -82,7 +82,7 @@ contract SVITest is Test {
     }
 
     params = SVITestParams({
-      tao: 0.2465753424657534e18,
+      tau: 0.2465753424657534e18,
       a: 0.17753424657534247e18,
       b: 0.17753424657534247e18,
       rho: 0.05917808219178082e18,
@@ -104,7 +104,7 @@ contract SVITest is Test {
 
   function testRevertsForBadParams() public {
     SVITestParams memory params = SVITestParams({
-      tao: 0.00821917808219178e18,
+      tau: 0.00821917808219178e18,
       a: -10e18,
       b: 0.01232876712328767e18,
       rho: -int(0.000821917808219178e18),
@@ -116,11 +116,11 @@ contract SVITest is Test {
     tester.getVol(1800e18, params);
   }
 
-  function testZeroStrikeVolCapped() public {
+  function testZeroStrikeVolIsZero() public {
     uint forwardPrice = 2000e18;
     SVITestParams memory params = _getDefaultSVIParams(forwardPrice);
     uint vol = tester.getVol(0, params);
-    assertEq(vol, SVI.MAX_VOL);
+    assertEq(vol, 0);
   }
 
   function testRevertWhenForwardPriceIsZero() public {
@@ -129,33 +129,44 @@ contract SVITest is Test {
     uint vol = tester.getVol(1800e18, params);
   }
 
-  function testLongDatedOptionShouldBeCapped() public {
-    SVITestParams memory params = _getDefaultSVIParams(2000e18);
-    params.tao = 5e18;
-    uint vol = tester.getVol(1800e18, params);
-    console2.log("vol", vol);
+  // function testMaxVarInSVIShouldBeCapped() public {
+  //   SVITestParams memory params = SVITestParams({
+  //     a: -0.041e18,
+  //     b: 0.1331e18,
+  //     sigma: 0.4153e18,
+  //     rho: 0.306e18,
+  //     m: 0.3586e18,
+  //     tau: 0.082e18,
+  //     forwardPrice: 1700e18
+  //   });
+  //   uint strike = 3000_000e18;
+  //   uint vol = tester.getVol(strike, params);
+  // }
+
+  function testSmallStrike() public {
+    uint strike = 1;
+    uint forwardPrice = 1800e18;
+    SVITestParams memory params = _getDefaultSVIParams(forwardPrice);
+
+    uint vol = tester.getVol(strike, params);
+    assertEq(vol / 1e18, 2); // 200%
   }
 
-  function testInputA() public {
-    SVITestParams memory params = _getDefaultSVIParams(2000e18);
-    params.a = -0.01e18;
-    uint vol = tester.getVol(1800e18, params);
-    console2.log("vol", vol);
-  }
-
-  function testFuzzGetVol(uint strike, uint forwardPrice, uint64 tao) public {
+  function testFuzzGetVol(uint strike, uint forwardPrice, uint64 tau) public {
     // fuzz test the get vol function will not revert
-    vm.assume(tao > 0);
-    vm.assume(tao < 100e18); // expiry < 5 years
+    vm.assume(tau > 0);
+    vm.assume(tau < 5e18); // expiry < 5 years
     vm.assume(forwardPrice < 10000_00e18);
     vm.assume(forwardPrice != 0);
     vm.assume(strike < 1000_000e18);
 
     SVITestParams memory params = _getDefaultSVIParams(forwardPrice);
-    params.tao = tao;
+    params.tau = tau;
 
     uint vol = tester.getVol(strike, params);
-    assert(vol <= SVI.MAX_VOL);
+
+    // todo: what are the bonds?
+    // assert(vol < 10e18);
   }
 
   function _getDefaultSVIParams(uint forwardPrice) internal view returns (SVITestParams memory params) {
@@ -165,7 +176,7 @@ contract SVITest is Test {
       rho: -int(0.000821917808219178e18),
       m: -int(0.000410958904109589e18),
       sigma: 0.000410958904109589e18,
-      tao: 0.00821917808219178e18,
+      tau: 0.00821917808219178e18,
       forwardPrice: forwardPrice
     });
   }

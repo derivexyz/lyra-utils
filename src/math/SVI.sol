@@ -6,6 +6,7 @@ import "src/decimals/SignedDecimalMath.sol";
 import "src/decimals/DecimalMath.sol";
 import "./FixedPointMathLib.sol";
 import "./UintLib.sol";
+import "./IntLib.sol";
 import "forge-std/console2.sol";
 
 /**
@@ -22,9 +23,16 @@ library SVI {
   error SVI_InvalidParameters();
   error SVI_NoForwardPrice();
 
-  uint internal constant MAX_VOL = 10e18;
-
+  /// @dev Upper bound of of w in SVI
   int internal constant MAX_TOTAL_VAR = 25e18;
+
+  int internal constant SHORT_DATE_k = 0.3e18;
+  int internal constant LONG_DATE_k = -0.3e18;
+
+  int internal constant ABS_K_MAX = 2.5e18;
+  int internal constant ABS_K_MIN = -2.5e18;
+
+  int internal constant TAU_MULTIPLIER = 3e18;
 
   /**
    * @dev compute the vol for a given strike and set of SVI parameters
@@ -43,11 +51,23 @@ library SVI {
     pure
     returns (uint)
   {
-    if (strike == 0) return MAX_VOL;
+    if (strike == 0) return 0;
     if (forwardPrice == 0) revert SVI_NoForwardPrice();
 
     // k = ln(strike / fwd)
-    int k = FixedPointMathLib.ln(int(strike.divideDecimal(forwardPrice)));
+    int sk = int(strike.divideDecimal(forwardPrice));
+    int k;
+    if (sk == 0) {
+      k = ABS_K_MIN;
+    } else {
+      // k = ln (strike / fwd)
+      // restrict k value to be within a certain range
+      k = FixedPointMathLib.ln(int(strike.divideDecimal(forwardPrice)));
+      int tauFactor = int(FixedPointMathLib.sqrt(uint(tau))).multiplyDecimal(TAU_MULTIPLIER);
+      int k_max = IntLib.min(ABS_K_MAX, IntLib.max(SHORT_DATE_k, tauFactor));
+      int k_min = IntLib.max(ABS_K_MIN, IntLib.min(LONG_DATE_k, -tauFactor));
+      k = IntLib.min(k_max, IntLib.max(k_min, k));
+    }
 
     int k_sub_m = int(k) - m;
 
@@ -70,6 +90,6 @@ library SVI {
 
     // sqrt((a + b * (sqrt((k - m)^2 + sigma^2) + rho * (k - m)))/tau)
     uint vol = FixedPointMathLib.sqrt(uint(w).divideDecimal(uint(tau)));
-    return UintLib.min(vol, MAX_VOL);
+    return vol;
   }
 }
