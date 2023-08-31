@@ -29,6 +29,7 @@ library SVI {
   /// @dev Upper bound of of w in SVI
   int internal constant MAX_TOTAL_VAR = 4e18;
 
+  /// @dev scaler used to calculate the upper bound and lower bound of k in SVI
   int internal constant K_SCALER = 3.5e18;
 
   /**
@@ -79,7 +80,7 @@ library SVI {
 
   /**
    * @dev k = ln(strike / fwd), but being bounded by B: -B < k < B
-   * where B = 4 x sqrt(a + b * sig)
+   * where B = 3.5 x sqrt(a + b * sig)
    */
   function getK(uint strike, int a, uint b, uint sigma, uint forwardPrice) internal pure returns (int k) {
     // calculate the bounds
