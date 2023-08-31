@@ -138,10 +138,10 @@ contract SVITest is Test {
     uint strike = 2000_000e18;
 
     int k = tester.getK(strike, params);
-    assertEq(k / 1e12, 409878); // +0.40987
+    assertEq(k / 1e12, 358643); // +0.35864
 
     uint vol = tester.getVol(strike, params);
-    assertEq(vol / 1e12, 645048); // 0.64504
+    assertEq(vol / 1e12, 633467); // 0.63346
   }
 
   function testMinKShouldBeCapped() public {
@@ -149,15 +149,15 @@ contract SVITest is Test {
     uint strike = 1e18;
 
     int k = tester.getK(strike, params);
-    assertEq(k / 1e12, -409878); // -0.40987
+    assertEq(k / 1e12, -358643); // -0.358643
 
     uint vol = tester.getVol(strike, params);
-    assertEq(vol / 1e12, 666465); // 0.66645
+    assertEq(vol / 1e12, 654279); // 0.65427
   }
 
   function testMaxVarCapped() public {
     SVITestParams memory params = SVITestParams({
-      a: 0.7e18,
+      a: 2e18,
       b: 0.6e18,
       sigma: 0.3e18,
       rho: -0.02e18,
@@ -166,10 +166,10 @@ contract SVITest is Test {
       forwardPrice: 2000e18
     });
 
-    uint strike = 2000_000e18;
+    uint strike = 200_000e18;
     uint vol = tester.getVol(strike, params);
 
-    assertEq(vol / 1e12, 8073324); // vol is 8.073324
+    assertEq(vol / 1e12, 10212037); // vol is 10.21
   }
 
   function testFuzzGetVol(uint strike, uint forwardPrice, uint64 tau) public view {

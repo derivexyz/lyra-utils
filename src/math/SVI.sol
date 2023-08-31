@@ -27,9 +27,9 @@ library SVI {
   error SVI_NoForwardPrice();
 
   /// @dev Upper bound of of w in SVI
-  int internal constant MAX_TOTAL_VAR = 2.5e18;
+  int internal constant MAX_TOTAL_VAR = 4e18;
 
-  int internal constant K_SCALER = 4e18;
+  int internal constant K_SCALER = 3.5e18;
 
   /**
    * @dev compute the vol for a given strike and set of SVI parameters
