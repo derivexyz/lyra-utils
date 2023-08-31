@@ -27,7 +27,7 @@ library SVI {
   error SVI_NoForwardPrice();
 
   /// @dev Upper bound of of w in SVI
-  int internal constant MAX_TOTAL_VAR = 25e18;
+  int internal constant MAX_TOTAL_VAR = 2.5e18;
 
   int internal constant K_SCALER = 4e18;
 
@@ -45,14 +45,13 @@ library SVI {
    */
   function getVol(uint strike, int a, uint b, int rho, int m, uint sigma, uint forwardPrice, uint64 tau)
     internal
-    view
+    pure
     returns (uint)
   {
     if (strike == 0) return 0;
     if (forwardPrice == 0) revert SVI_NoForwardPrice();
 
-    // k = ln(strike / fwd), but being capped at the bounds of 
-    // bound = 4 x sqrt(a + b * sig), -bound < k
+    // k = ln(strike / fwd) but with some bounds
     int k = getK(strike, a, b, sigma, forwardPrice);
     int k_sub_m = int(k) - m;
 
@@ -79,8 +78,8 @@ library SVI {
   }
 
   /**
-   * @dev k = ln(strike / fwd), but being capped at some bounds B where -B < k < B
-   * B = 4 x sqrt(a + b * sig)
+   * @dev k = ln(strike / fwd), but being bounded by B: -B < k < B
+   * where B = 4 x sqrt(a + b * sig)
    */
   function getK(uint strike, int a, uint b, uint sigma, uint forwardPrice) internal pure returns (int k) {
     // calculate the bounds

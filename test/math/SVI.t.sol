@@ -20,13 +20,13 @@ struct SVITestParams {
  * @dev for current `forge coverage` to work, it needs to call an external contract then invoke internal library
  */
 contract SVITester {
-  function getVol(uint strike, SVITestParams memory params) external view returns (uint vol) {
+  function getVol(uint strike, SVITestParams memory params) external pure returns (uint vol) {
     uint res =
       SVI.getVol(strike, params.a, params.b, params.rho, params.m, params.sigma, params.forwardPrice, params.tau);
     return res;
   }
 
-  function getK(uint strike, SVITestParams memory params) external view returns (int k) {
+  function getK(uint strike, SVITestParams memory params) external pure returns (int k) {
     return SVI.getK(strike, params.a, params.b, params.sigma, params.forwardPrice);
   }
 }
@@ -141,7 +141,7 @@ contract SVITest is Test {
     assertEq(k / 1e12, 409878); // +0.40987
 
     uint vol = tester.getVol(strike, params);
-    assertEq(vol / 1e12, 645048); // 0.64504 
+    assertEq(vol / 1e12, 645048); // 0.64504
   }
 
   function testMinKShouldBeCapped() public {
@@ -153,6 +153,23 @@ contract SVITest is Test {
 
     uint vol = tester.getVol(strike, params);
     assertEq(vol / 1e12, 666465); // 0.66645
+  }
+
+  function testMaxVarCapped() public {
+    SVITestParams memory params = SVITestParams({
+      a: 0.7e18,
+      b: 0.6e18,
+      sigma: 0.3e18,
+      rho: -0.02e18,
+      m: 0.03e18,
+      tau: 0.03835616438e18, // 14/365
+      forwardPrice: 2000e18
+    });
+
+    uint strike = 2000_000e18;
+    uint vol = tester.getVol(strike, params);
+
+    assertEq(vol / 1e12, 8073324); // vol is 8.073324
   }
 
   function testFuzzGetVol(uint strike, uint forwardPrice, uint64 tau) public view {
