@@ -5,10 +5,9 @@ pragma solidity ^0.8.0;
 import "src/decimals/SignedDecimalMath.sol";
 import "src/decimals/DecimalMath.sol";
 import "./FixedPointMathLib.sol";
-import "./IntLib.sol";
+
 import "openzeppelin-upgradeable/utils/math/SafeCastUpgradeable.sol";
 
-import "forge-std/console2.sol";
 
 /**
  * @title SVI
@@ -87,17 +86,18 @@ library SVI {
     int volFactor = int(FixedPointMathLib.sqrt((a + b.multiplyDecimal(sigma).toInt256()).toUint256()));
     int k_bound = volFactor.multiplyDecimal(K_SCALER);
     int sk = int(strike.divideDecimal(forwardPrice));
-    if (sk == 0) {
-      k = -k_bound;
-    } else {
-      // k = ln (strike / fwd)
-      k = FixedPointMathLib.ln(sk);
-      // make sure -B < k < B
-      if (k > k_bound) {
-        k = k_bound;
-      } else if (k < -k_bound) {
-        k = -k_bound;
-      }
+    
+    if (sk == 0)  return -k_bound;
+      
+    // k = ln (strike / fwd)
+    k = FixedPointMathLib.ln(sk);
+    
+    // make sure -B < k < B
+    if (k > k_bound) {
+      return k_bound;
+    } 
+    if (k < -k_bound) {
+      return -k_bound;
     }
   }
 }
