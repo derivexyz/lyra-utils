@@ -8,6 +8,8 @@ import "./FixedPointMathLib.sol";
 import "./IntLib.sol";
 import "openzeppelin-upgradeable/utils/math/SafeCastUpgradeable.sol";
 
+import "forge-std/console2.sol";
+
 /**
  * @title SVI
  * @author Lyra
@@ -43,30 +45,15 @@ library SVI {
    */
   function getVol(uint strike, int a, uint b, int rho, int m, uint sigma, uint forwardPrice, uint64 tau)
     internal
-    pure
+    view
     returns (uint)
   {
     if (strike == 0) return 0;
     if (forwardPrice == 0) revert SVI_NoForwardPrice();
 
-    // k = ln(strike / fwd)
-    int k;
-    {
-      int sk = int(strike.divideDecimal(forwardPrice));
-      int volFactor = int(FixedPointMathLib.sqrt((a + b.multiplyDecimal(sigma).toInt256()).toUint256()));
-      int k_bound = volFactor.multiplyDecimal(K_SCALER);
-      if (sk == 0) {
-        k = -k_bound;
-      } else {
-        // k = ln (strike / fwd)
-        k = FixedPointMathLib.ln(int(strike.divideDecimal(forwardPrice)));
-        // make sure -k_bound < k < k_bound
-        if (k > k_bound) k = k_bound;
-        else if (k < -k_bound) k = -k_bound;
-      }
-    }
-    
-
+    // k = ln(strike / fwd), but being capped at the bounds of 
+    // bound = 4 x sqrt(a + b * sig), -bound < k
+    int k = getK(strike, a, b, sigma, forwardPrice, tau);
     int k_sub_m = int(k) - m;
 
     // any number squared is positive, so we can cast to uint
@@ -89,5 +76,28 @@ library SVI {
     // sqrt((a + b * (sqrt((k - m)^2 + sigma^2) + rho * (k - m)))/tau)
     uint vol = FixedPointMathLib.sqrt(uint(w).divideDecimal(uint(tau)));
     return vol;
+  }
+
+  /**
+   * @dev k = ln(strike / fwd), but being capped at some bounds B where -B < k < B
+   * B = 4 x sqrt(a + b * sig)
+   */
+  function getK(uint strike, int a, uint b, uint sigma, uint forwardPrice, uint64 tau) internal pure returns (int k) {
+    // calculate the bounds
+    int volFactor = int(FixedPointMathLib.sqrt((a + b.multiplyDecimal(sigma).toInt256()).toUint256()));
+    int k_bound = volFactor.multiplyDecimal(K_SCALER);
+    int sk = int(strike.divideDecimal(forwardPrice));
+    if (sk == 0) {
+      k = -k_bound;
+    } else {
+      // k = ln (strike / fwd)
+      k = FixedPointMathLib.ln(sk);
+      // make sure -B < k < B
+      if (k > k_bound) {
+        k = k_bound;
+      } else if (k < -k_bound) {
+        k = -k_bound;
+      }
+    }
   }
 }
