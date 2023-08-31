@@ -53,7 +53,7 @@ library SVI {
 
     // k = ln(strike / fwd), but being capped at the bounds of 
     // bound = 4 x sqrt(a + b * sig), -bound < k
-    int k = getK(strike, a, b, sigma, forwardPrice, tau);
+    int k = getK(strike, a, b, sigma, forwardPrice);
     int k_sub_m = int(k) - m;
 
     // any number squared is positive, so we can cast to uint
@@ -82,7 +82,7 @@ library SVI {
    * @dev k = ln(strike / fwd), but being capped at some bounds B where -B < k < B
    * B = 4 x sqrt(a + b * sig)
    */
-  function getK(uint strike, int a, uint b, uint sigma, uint forwardPrice, uint64 tau) internal pure returns (int k) {
+  function getK(uint strike, int a, uint b, uint sigma, uint forwardPrice) internal pure returns (int k) {
     // calculate the bounds
     int volFactor = int(FixedPointMathLib.sqrt((a + b.multiplyDecimal(sigma).toInt256()).toUint256()));
     int k_bound = volFactor.multiplyDecimal(K_SCALER);

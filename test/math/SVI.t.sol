@@ -27,7 +27,7 @@ contract SVITester {
   }
 
   function getK(uint strike, SVITestParams memory params) external view returns (int k) {
-    return SVI.getK(strike, params.a, params.b, params.sigma, params.forwardPrice, params.tau);
+    return SVI.getK(strike, params.a, params.b, params.sigma, params.forwardPrice);
   }
 }
 
