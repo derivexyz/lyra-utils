@@ -8,7 +8,6 @@ import "./FixedPointMathLib.sol";
 
 import "openzeppelin-upgradeable/utils/math/SafeCastUpgradeable.sol";
 
-
 /**
  * @title SVI
  * @author Lyra
@@ -86,18 +85,14 @@ library SVI {
     int volFactor = int(FixedPointMathLib.sqrt((a + b.multiplyDecimal(sigma).toInt256()).toUint256()));
     int k_bound = volFactor.multiplyDecimal(K_SCALER);
     int sk = int(strike.divideDecimal(forwardPrice));
-    
-    if (sk == 0)  return -k_bound;
-      
+
+    if (sk == 0) return -k_bound;
+
     // k = ln (strike / fwd)
     k = FixedPointMathLib.ln(sk);
-    
+
     // make sure -B < k < B
-    if (k > k_bound) {
-      return k_bound;
-    } 
-    if (k < -k_bound) {
-      return -k_bound;
-    }
+    if (k > k_bound) return k_bound;
+    if (k < -k_bound) return -k_bound;
   }
 }
