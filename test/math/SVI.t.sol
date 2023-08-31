@@ -172,18 +172,15 @@ contract SVITest is Test {
     assertEq(vol / 1e12, 10212037); // vol is 10.21
   }
 
-  function testFuzzGetVol(uint strike, uint forwardPrice, uint64 tau) public view {
-    // fuzz test the get vol function will not revert
-    vm.assume(tau > 0);
-    vm.assume(tau < 5e18); // expiry < 5 years
-    vm.assume(forwardPrice < 10000_00e18);
+  function testFuzzGetVolCapped(uint strike, uint forwardPrice) public view {
     vm.assume(forwardPrice != 0);
-    vm.assume(strike < 1000_000e18);
+    vm.assume(strike < 50_000_000e18);
 
     SVITestParams memory params = _getDefaultSVIParams(forwardPrice);
-    params.tau = tau;
 
-    tester.getVol(strike, params);
+    uint vol = tester.getVol(strike, params);
+
+    assert(vol < 2e18);
   }
 
   function _getDefaultSVIParams(uint forwardPrice) internal pure returns (SVITestParams memory params) {
