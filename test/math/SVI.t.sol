@@ -112,7 +112,7 @@ contract SVITest is Test {
       sigma: 0.000410958904109589e18,
       forwardPrice: 1800e18
     });
-    vm.expectRevert(SVI.SVI_InvalidParameters.selector);
+    vm.expectRevert(bytes("SafeCast: value must be positive"));
     tester.getVol(1800e18, params);
   }
 
@@ -149,7 +149,7 @@ contract SVITest is Test {
     SVITestParams memory params = _getDefaultSVIParams(forwardPrice);
 
     uint vol = tester.getVol(strike, params);
-    assertEq(vol / 1e18, 2); // 200%
+    assertEq(vol / 1e18, 1); // 200%
   }
 
   function testFuzzGetVol(uint strike, uint forwardPrice, uint64 tau) public view {

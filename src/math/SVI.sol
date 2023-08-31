@@ -6,6 +6,7 @@ import "src/decimals/SignedDecimalMath.sol";
 import "src/decimals/DecimalMath.sol";
 import "./FixedPointMathLib.sol";
 import "./IntLib.sol";
+import "openzeppelin-upgradeable/utils/math/SafeCastUpgradeable.sol";
 
 /**
  * @title SVI
@@ -17,6 +18,8 @@ library SVI {
   using SignedDecimalMath for int;
   using FixedPointMathLib for uint;
   using FixedPointMathLib for int;
+  using SafeCastUpgradeable for int;
+  using SafeCastUpgradeable for uint;
 
   error SVI_InvalidParameters();
   error SVI_NoForwardPrice();
@@ -24,13 +27,7 @@ library SVI {
   /// @dev Upper bound of of w in SVI
   int internal constant MAX_TOTAL_VAR = 25e18;
 
-  int internal constant SHORT_DATE_k = 0.3e18;
-  int internal constant LONG_DATE_k = -0.3e18;
-
-  int internal constant ABS_K_MAX = 2.5e18;
-  int internal constant ABS_K_MIN = -2.5e18;
-
-  int internal constant TAU_MULTIPLIER = 3e18;
+  int internal constant K_SCALER = 4e18;
 
   /**
    * @dev compute the vol for a given strike and set of SVI parameters
@@ -53,25 +50,28 @@ library SVI {
     if (forwardPrice == 0) revert SVI_NoForwardPrice();
 
     // k = ln(strike / fwd)
-    int sk = int(strike.divideDecimal(forwardPrice));
     int k;
-    if (sk == 0) {
-      k = ABS_K_MIN;
-    } else {
-      // k = ln (strike / fwd)
-      // restrict k value to be within a certain range
-      k = FixedPointMathLib.ln(int(strike.divideDecimal(forwardPrice)));
-      int tauFactor = int(FixedPointMathLib.sqrt(uint(tau))).multiplyDecimal(TAU_MULTIPLIER);
-      int k_max = IntLib.min(ABS_K_MAX, IntLib.max(SHORT_DATE_k, tauFactor));
-      int k_min = IntLib.max(ABS_K_MIN, IntLib.min(LONG_DATE_k, -tauFactor));
-      k = IntLib.min(k_max, IntLib.max(k_min, k));
+    {
+      int sk = int(strike.divideDecimal(forwardPrice));
+      int volFactor = int(FixedPointMathLib.sqrt((a + b.multiplyDecimal(sigma).toInt256()).toUint256()));
+      int k_bound = volFactor.multiplyDecimal(K_SCALER);
+      if (sk == 0) {
+        k = -k_bound;
+      } else {
+        // k = ln (strike / fwd)
+        k = FixedPointMathLib.ln(int(strike.divideDecimal(forwardPrice)));
+        // make sure -k_bound < k < k_bound
+        if (k > k_bound) k = k_bound;
+        else if (k < -k_bound) k = -k_bound;
+      }
     }
+    
 
     int k_sub_m = int(k) - m;
 
     // any number squared is positive, so we can cast to uint
     uint k_sub_m_sq = uint(k_sub_m.multiplyDecimal(k_sub_m)); // (k - m)^2
-    uint sigma_sq = uint(sigma.multiplyDecimal(sigma)); // sigma^2
+    uint sigma_sq = sigma.multiplyDecimal(sigma); // sigma^2
 
     // b * (sqrt((k - m)^2 + sigma^2) + rho * (k - m))
     int bPortion =
