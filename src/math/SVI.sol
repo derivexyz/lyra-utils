@@ -28,7 +28,7 @@ library SVI {
   int internal constant MAX_TOTAL_VAR = 4e18;
 
   /// @dev scaler used to calculate the upper bound and lower bound of k in SVI
-  int internal constant K_SCALER = 3.5e18;
+  int internal constant TOTAL_VOL_SCALAR = 4e18;
 
   /**
    * @dev compute the vol for a given strike and set of SVI parameters
@@ -78,12 +78,12 @@ library SVI {
 
   /**
    * @dev k = ln(strike / fwd), but being bounded by B: -B < k < B
-   * where B = 3.5 x sqrt(a + b * sig)
+   * where B = TOTAL_VOL_SCALAR x sqrt(a + b * sig)
    */
   function getK(uint strike, int a, uint b, uint sigma, uint forwardPrice) internal pure returns (int k) {
     // calculate the bounds
     int volFactor = int(FixedPointMathLib.sqrt((a + b.multiplyDecimal(sigma).toInt256()).toUint256()));
-    int k_bound = volFactor.multiplyDecimal(K_SCALER);
+    int k_bound = volFactor.multiplyDecimal(TOTAL_VOL_SCALAR);
     int sk = int(strike.divideDecimal(forwardPrice));
 
     if (sk == 0) return -k_bound;

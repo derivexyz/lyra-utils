@@ -138,10 +138,10 @@ contract SVITest is Test {
     uint strike = 2000_000e18;
 
     int k = tester.getK(strike, params);
-    assertEq(k / 1e12, 358643); // +0.35864
+    assertEq(k / 1e12, 409878); // +0.409878
 
     uint vol = tester.getVol(strike, params);
-    assertEq(vol / 1e12, 633467); // 0.63346
+    assertEq(vol / 1e12, 645048); // 0.645048
   }
 
   function testMinKShouldBeCapped() public {
@@ -149,10 +149,10 @@ contract SVITest is Test {
     uint strike = 1e18;
 
     int k = tester.getK(strike, params);
-    assertEq(k / 1e12, -358643); // -0.358643
+    assertEq(k / 1e12, -409878); // -0.409878
 
     uint vol = tester.getVol(strike, params);
-    assertEq(vol / 1e12, 654279); // 0.65427
+    assertEq(vol / 1e12, 666465); // 0.666465
   }
 
   function testMaxVarCapped() public {
