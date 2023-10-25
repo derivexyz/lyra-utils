@@ -59,7 +59,7 @@ library Black76 {
    * @return callPrice Call price for given Black76 parameters (18-decimal precision).
    * @return putPrice Put price for given Black76 parameters (18-decimal precision).
    */
-  function prices(Black76Inputs memory b76Input) internal pure returns (uint callPrice, uint putPrice) {
+  function prices(Black76Inputs memory b76Input) external pure returns (uint callPrice, uint putPrice) {
     unchecked {
       uint tAnnualised = annualise(b76Input.timeToExpirySec);
       // products of <128 bit numbers, cannot overflow here when caseted to 256
