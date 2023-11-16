@@ -1,6 +1,11 @@
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: GPL-3.0-only
 pragma solidity ^0.8.0;
 
+/**
+ * @title FixedPointMathLib
+ * @notice Library for some useful fixed point math functions
+ * With inspiration from: https://github.com/recmo/experiment-solexp/blob/main/src/FixedPointMathLib.sol
+ */
 library FixedPointMathLib {
   /// @dev Magic numbers for normal CDF
   uint private constant N0 = 4062099735652764000328;
@@ -30,9 +35,7 @@ library FixedPointMathLib {
     return exp(x / 1e9) * 1e9;
   }
 
-  // Computes ln(x) in 1e18 fixed point.
-  // Reverts if x is negative or zero.
-  // Consumes 670 gas.
+  /// @dev Computes ln(x) in 1e18 fixed point. Reverts if x is negative or zero. Consumes 670 gas.
   function ln(int x) internal pure returns (int r) {
     unchecked {
       if (x < 1) {
