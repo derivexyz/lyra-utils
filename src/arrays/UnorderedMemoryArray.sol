@@ -9,8 +9,8 @@ pragma solidity ^0.8.0;
 
 library UnorderedMemoryArray {
   /**
-   * @dev Add unique element to existing "array" if and increase max index
-   * array memory will be updated in place
+   * @dev Add unique element to existing "array" if and increase max index array memory will be updated in place
+   * Assumes that the array is not full (i.e. arrayLen < array.length)
    * @param array array of number
    * @param newElement number to check
    * @param arrayLen previously recorded array length with non-zero value
@@ -33,8 +33,8 @@ library UnorderedMemoryArray {
   }
 
   /**
-   * @dev Add unique element to existing "array" if and increase max index
-   * array memory will be updated in place
+   * @dev Add unique element to existing "array" if and increase max index array memory will be updated in place
+   * Assumes that the array is not full (i.e. arrayLen < array.length)
    * @param array array of address
    * @param newElement address to check
    * @param arrayLen previously recorded array length with non-zero value
@@ -94,7 +94,7 @@ library UnorderedMemoryArray {
   }
 
   /**
-   * @dev shorten a memory array length in place
+   * @dev Shorten a memory array length in place. Will produce an invalid result if finalLength > array.length
    */
   function trimArray(uint[] memory array, uint finalLength) internal pure {
     assembly {
@@ -103,7 +103,7 @@ library UnorderedMemoryArray {
   }
 
   /**
-   * @dev shorten a memory array length in place
+   * @dev Shorten a memory array length in place. Will produce an invalid result if finalLength > array.length
    */
   function trimArray(address[] memory array, uint finalLength) internal pure {
     assembly {
