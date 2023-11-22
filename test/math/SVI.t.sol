@@ -169,7 +169,7 @@ contract SVITest is Test {
     uint strike = 200_000e18;
     uint vol = tester.getVol(strike, params);
 
-    assertEq(vol / 1e12, 10212037); // vol is 10.21
+    assertEq(vol / 1e12, 11064985); // vol is 11.06
   }
 
   function testFuzzGetVolCapped(uint strike, uint forwardPrice) public view {

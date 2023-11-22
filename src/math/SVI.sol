@@ -25,7 +25,7 @@ library SVI {
   error SVI_NoForwardPrice();
 
   /// @dev Upper bound of of w in SVI
-  int internal constant MAX_TOTAL_VAR = 4e18;
+  int internal constant MAX_TOTAL_VAR = 144e18;
 
   /// @dev scaler used to calculate the upper bound and lower bound of k in SVI
   int internal constant TOTAL_VOL_SCALAR = 4e18;
@@ -72,8 +72,7 @@ library SVI {
     }
 
     // sqrt((a + b * (sqrt((k - m)^2 + sigma^2) + rho * (k - m)))/tau)
-    uint vol = FixedPointMathLib.sqrt(uint(w).divideDecimal(uint(tau)));
-    return vol;
+    return FixedPointMathLib.sqrt(uint(w).divideDecimal(uint(tau)));
   }
 
   /**
