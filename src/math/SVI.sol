@@ -6,8 +6,6 @@ import "src/decimals/SignedDecimalMath.sol";
 import "src/decimals/DecimalMath.sol";
 import "./FixedPointMathLib.sol";
 
-import "openzeppelin-upgradeable/utils/math/SafeCastUpgradeable.sol";
-
 /**
  * @title SVI
  * @author Lyra
@@ -18,8 +16,6 @@ library SVI {
   using SignedDecimalMath for int;
   using FixedPointMathLib for uint;
   using FixedPointMathLib for int;
-  using SafeCastUpgradeable for int;
-  using SafeCastUpgradeable for uint;
 
   error SVI_InvalidParameters();
   error SVI_NoForwardPrice();
@@ -81,7 +77,7 @@ library SVI {
    */
   function getK(uint strike, int a, uint b, uint sigma, uint forwardPrice) internal pure returns (int k) {
     // calculate the bounds
-    int volFactor = int(FixedPointMathLib.sqrt((a + b.multiplyDecimal(sigma).toInt256()).toUint256()));
+    int volFactor = int(FixedPointMathLib.sqrt(toUintSafe(a + toIntSafe(b.multiplyDecimal(sigma)))));
     int k_bound = volFactor.multiplyDecimal(TOTAL_VOL_SCALAR);
     int sk = int(strike.divideDecimal(forwardPrice));
 
@@ -93,5 +89,15 @@ library SVI {
     // make sure -B < k < B
     if (k > k_bound) return k_bound;
     if (k < -k_bound) return -k_bound;
+  }
+
+  function toIntSafe(uint value) internal pure returns (int) {
+    if (int(value) < 0) revert("SVI: invalid uint cast");
+    return int(value);
+  }
+
+  function toUintSafe(int value) internal pure returns (uint) {
+    if (value < 0) revert("SVI: value must be positive");
+    return uint(value);
   }
 }

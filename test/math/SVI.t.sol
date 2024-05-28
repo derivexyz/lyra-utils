@@ -116,7 +116,7 @@ contract SVITest is Test {
       sigma: 0.000410958904109589e18,
       forwardPrice: 1800e18
     });
-    vm.expectRevert(bytes("SafeCast: value must be positive"));
+    vm.expectRevert(bytes("SVI: value must be positive"));
     tester.getVol(1800e18, params);
   }
 
