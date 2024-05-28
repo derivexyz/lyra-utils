@@ -6,7 +6,6 @@ pragma solidity ^0.8.0;
  * @author Lyra
  * @notice using quick-sort to sort memory arrays.
  */
-
 library QuickSort {
   /**
    * @dev Sort both array and return sorted array of indexes

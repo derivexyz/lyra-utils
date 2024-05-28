@@ -58,8 +58,13 @@ library Black76 {
    * @param b76Input Input to Black76 pricing.
    * @return callPrice Call price for given Black76 parameters (18-decimal precision).
    * @return putPrice Put price for given Black76 parameters (18-decimal precision).
+   * @return callDelta Delta of the given Black76 parameters (18-decimal precision). Between 0 and 1.
    */
-  function prices(Black76Inputs memory b76Input) external pure returns (uint callPrice, uint putPrice) {
+  function pricesAndDelta(Black76Inputs memory b76Input)
+    public
+    pure
+    returns (uint callPrice, uint putPrice, uint callDelta)
+  {
     unchecked {
       uint tAnnualised = annualise(b76Input.timeToExpirySec);
       // products of <128 bit numbers, cannot overflow here when caseted to 256
@@ -67,16 +72,16 @@ library Black76 {
       uint fwd = uint(b76Input.fwdPrice);
       uint fwdDiscounted = fwd * uint(b76Input.discount) / 1e18;
       if (b76Input.strikePrice == 0) {
-        return (fwdDiscounted, uint(0));
+        return (fwdDiscounted, uint(0), 1e18);
       }
 
       uint strikeDiscounted = uint(b76Input.strikePrice) * uint(b76Input.discount) / 1e18;
       if (fwd == 0) {
-        return (uint(0), strikeDiscounted);
+        return (uint(0), strikeDiscounted, 0);
       }
 
       uint moneyness = uint(b76Input.strikePrice) * 1e18 / fwd;
-      (callPrice, putPrice) = _standardPrices(moneyness, totalVol);
+      (callPrice, putPrice, callDelta) = _standardPrices(moneyness, totalVol);
 
       // these below cannot overflow:
       // fwdDiscounted is a product of 128 bit fwd and 64 bit discount over 1e18
@@ -92,6 +97,14 @@ library Black76 {
       callPrice = callPrice > fwdDiscounted ? fwdDiscounted : callPrice;
       putPrice = putPrice > strikeDiscounted ? strikeDiscounted : putPrice;
     }
+  }
+
+  function prices(Black76Inputs memory b76Input) public pure returns (uint callPrice, uint putPrice) {
+    (callPrice, putPrice,) = pricesAndDelta(b76Input);
+  }
+
+  function callDelta(Black76Inputs memory b76Input) public pure returns (uint callDelta) {
+    (,, callDelta) = pricesAndDelta(b76Input);
   }
 
   ///////////////////////////////////////
@@ -112,9 +125,9 @@ library Black76 {
    * @param totalVol sigma * sqrt(time to expiry)
    * @return stdCallPrice Call price, standardized to forward = discount = 1.0
    */
-  function _standardCall(uint moneyness, uint totalVol) internal pure returns (uint stdCallPrice) {
+  function _standardCall(uint moneyness, uint totalVol) internal pure returns (uint stdCallPrice, uint callDelta) {
     unchecked {
-      if (totalVol >= MAX_TOTAL_VOL) return 1e18;
+      if (totalVol >= MAX_TOTAL_VOL) return (1e18, 1e18);
       totalVol = (totalVol == 0) ? 1 : totalVol;
       moneyness = (moneyness == 0) ? 1 : moneyness;
       int k = int(moneyness).ln();
@@ -124,7 +137,7 @@ library Black76 {
 
       uint Nd1 = FixedPointMathLib.stdNormalCDF(d1);
       uint mNd2 = moneyness * FixedPointMathLib.stdNormalCDF(d2) / 1e18;
-      return (Nd1 >= mNd2) ? Nd1 - mNd2 : 0;
+      return ((Nd1 >= mNd2) ? Nd1 - mNd2 : 0, Nd1);
     }
   }
 
@@ -148,9 +161,13 @@ library Black76 {
    * @return stdCallPrice Call price, standardized to forward = discount = 1.0
    * @return stdPutPrice Put price, standardized to forward = discount = 1.0
    */
-  function _standardPrices(uint moneyness, uint totalVol) internal pure returns (uint stdCallPrice, uint stdPutPrice) {
+  function _standardPrices(uint moneyness, uint totalVol)
+    internal
+    pure
+    returns (uint stdCallPrice, uint stdPutPrice, uint callDelta)
+  {
     unchecked {
-      stdCallPrice = _standardCall(moneyness, totalVol);
+      (stdCallPrice, callDelta) = _standardCall(moneyness, totalVol);
       stdPutPrice = _standardPutFromCall(moneyness, stdCallPrice);
     }
   }
@@ -160,7 +177,7 @@ library Black76 {
    * @param secs # of seconds (usually from block.timestamp till option expiry).
    * @return yearFraction An 18-decimal year fraction.
    */
-  function annualise(uint64 secs) internal pure returns (uint yearFraction) {
+  function annualise(uint64 secs) public pure returns (uint yearFraction) {
     unchecked {
       // unchecked saves 500 gas, cannot overflow since input is 64 bit
       return uint(secs) * 1e18 / SECONDS_PER_YEAR;

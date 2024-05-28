@@ -28,7 +28,6 @@ pragma solidity ^0.8.0;
  * @dev Modified synthetix SafeDecimalMath to include internal arithmetic underflow/overflow.
  * @dev https://docs.synthetix.io/contracts/source/libraries/SafeDecimalMath/
  */
-
 library DecimalMath {
   /* Number of decimal places in the representations. */
   uint8 public constant decimals = 18;

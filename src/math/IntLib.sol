@@ -7,7 +7,6 @@ pragma solidity ^0.8.0;
  * @author Lyra
  * @notice util functions for Int
  */
-
 library IntLib {
   /**
    * @notice Returns absolute value.

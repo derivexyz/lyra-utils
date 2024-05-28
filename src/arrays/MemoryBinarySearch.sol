@@ -7,7 +7,6 @@ pragma solidity ^0.8.0;
  * @notice Binary search utilities for memory arrays.
  * Close copy of OZ/Arrays.sol storage binary search.
  */
-
 library MemoryBinarySearch {
   /**
    * @dev Searches a sorted `array` and returns the first index that contains

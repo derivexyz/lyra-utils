@@ -18,6 +18,10 @@ contract Black76Tester {
   function annualise(uint64 secToExpiry) external pure returns (uint) {
     return Black76.annualise(secToExpiry);
   }
+
+  function callDelta(Black76.Black76Inputs memory b76Input) external pure returns (uint) {
+    return b76Input.callDelta();
+  }
 }
 
 contract Black76Test is Test {
@@ -119,10 +123,33 @@ contract Black76Test is Test {
     benchmarkResults[7] = [int(990e18), int(0)];
     benchmarkResults[8] = [int(0), int(990e18)];
 
+    // array of delta benchmarks computed in python
+    uint[] memory deltaBenchmarkResults = new uint[](b76TestInputs.length);
+    // Replace these with your actual benchmark results
+    deltaBenchmarkResults[0] = 0.5276016935562116e18;
+    deltaBenchmarkResults[1] = 0.006071372605597036e18;
+    deltaBenchmarkResults[2] = 0.999999999944921e18;
+    deltaBenchmarkResults[3] = 1e18;
+    deltaBenchmarkResults[4] = 0.9949346359666408e18;
+    deltaBenchmarkResults[5] = 0;
+    deltaBenchmarkResults[6] = 1e18;
+    deltaBenchmarkResults[7] = 1e18;
+    deltaBenchmarkResults[8] = 0;
+
+    assert(b76TestInputs.length == deltaBenchmarkResults.length);
     assert(b76TestInputs.length == benchmarkResults.length);
 
     for (uint i = 0; i < b76TestInputs.length; i++) {
-      (uint call, uint put) = tester.prices(b76TestInputs[i]);
+      uint delta = b76TestInputs[i].callDelta();
+      (uint call, uint put) = b76TestInputs[i].prices();
+
+      assertApproxEqAbs(delta, deltaBenchmarkResults[i], accuracy);
+      assertApproxEqAbs(int(call), benchmarkResults[i][0], accuracy);
+      assertApproxEqAbs(int(put), benchmarkResults[i][1], accuracy);
+
+      (call, put, delta) = b76TestInputs[i].pricesAndDelta();
+
+      assertApproxEqAbs(delta, deltaBenchmarkResults[i], accuracy);
       assertApproxEqAbs(int(call), benchmarkResults[i][0], accuracy);
       assertApproxEqAbs(int(put), benchmarkResults[i][1], accuracy);
     }

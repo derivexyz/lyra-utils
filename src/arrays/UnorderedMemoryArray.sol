@@ -6,7 +6,6 @@ pragma solidity ^0.8.0;
  * @author Lyra
  * @notice util functions for in-memory unordered array operations
  */
-
 library UnorderedMemoryArray {
   /**
    * @dev Add unique element to existing "array" if and increase max index array memory will be updated in place
