@@ -67,12 +67,12 @@ library Black76 {
   {
     unchecked {
       uint tAnnualised = annualise(b76Input.timeToExpirySec);
-      // products of <128 bit numbers, cannot overflow here when caseted to 256
+      // products of <128 bit numbers, cannot overflow here when cast to 256
       uint totalVol = uint(b76Input.volatility) * uint(FixedPointMathLib.sqrt(tAnnualised)) / 1e18;
       uint fwd = uint(b76Input.fwdPrice);
       uint fwdDiscounted = fwd * uint(b76Input.discount) / 1e18;
       if (b76Input.strikePrice == 0) {
-        return (fwdDiscounted, uint(0), 1e18);
+        return (fwdDiscounted, uint(0), uint(b76Input.discount));
       }
 
       uint strikeDiscounted = uint(b76Input.strikePrice) * uint(b76Input.discount) / 1e18;
@@ -92,6 +92,7 @@ library Black76 {
       // putPrice * fwdDiscounted takes up at most (128 + 59 + 64 - 59) < 256 bits
       callPrice = callPrice * fwdDiscounted / 1e18;
       putPrice = putPrice * fwdDiscounted / 1e18;
+      callDelta = callDelta * uint(b76Input.discount) / 1e18;
 
       // cap the theo prices to resolve any potential rounding errors with super small/big spots/strikes
       callPrice = callPrice > fwdDiscounted ? fwdDiscounted : callPrice;
@@ -103,7 +104,7 @@ library Black76 {
     (callPrice, putPrice,) = pricesAndDelta(b76Input);
   }
 
-  function callDelta(Black76Inputs memory b76Input) public pure returns (uint callDelta) {
+  function getCallDelta(Black76Inputs memory b76Input) public pure returns (uint callDelta) {
     (,, callDelta) = pricesAndDelta(b76Input);
   }
 
@@ -164,10 +165,10 @@ library Black76 {
   function _standardPrices(uint moneyness, uint totalVol)
     internal
     pure
-    returns (uint stdCallPrice, uint stdPutPrice, uint callDelta)
+    returns (uint stdCallPrice, uint stdPutPrice, uint stdCallDelta)
   {
     unchecked {
-      (stdCallPrice, callDelta) = _standardCall(moneyness, totalVol);
+      (stdCallPrice, stdCallDelta) = _standardCall(moneyness, totalVol);
       stdPutPrice = _standardPutFromCall(moneyness, stdCallPrice);
     }
   }

@@ -20,7 +20,7 @@ contract Black76Tester {
   }
 
   function callDelta(Black76.Black76Inputs memory b76Input) external pure returns (uint) {
-    return b76Input.callDelta();
+    return b76Input.getCallDelta();
   }
 }
 
@@ -140,16 +140,16 @@ contract Black76Test is Test {
     assert(b76TestInputs.length == benchmarkResults.length);
 
     for (uint i = 0; i < b76TestInputs.length; i++) {
-      uint delta = b76TestInputs[i].callDelta();
+      uint delta = b76TestInputs[i].getCallDelta();
       (uint call, uint put) = b76TestInputs[i].prices();
 
-      assertApproxEqAbs(delta, deltaBenchmarkResults[i], accuracy);
+      assertApproxEqAbs(delta, deltaBenchmarkResults[i] * uint(b76TestInputs[i].discount) / 1e18, accuracy);
       assertApproxEqAbs(int(call), benchmarkResults[i][0], accuracy);
       assertApproxEqAbs(int(put), benchmarkResults[i][1], accuracy);
 
       (call, put, delta) = b76TestInputs[i].pricesAndDelta();
 
-      assertApproxEqAbs(delta, deltaBenchmarkResults[i], accuracy);
+      assertApproxEqAbs(delta, deltaBenchmarkResults[i] * uint(b76TestInputs[i].discount) / 1e18, accuracy);
       assertApproxEqAbs(int(call), benchmarkResults[i][0], accuracy);
       assertApproxEqAbs(int(put), benchmarkResults[i][1], accuracy);
     }
